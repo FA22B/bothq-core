@@ -24,7 +24,7 @@ public class JdaEventPublisherAutoConfiguration {
                 publisher.publishEvent(new PayloadApplicationEvent<>(jda, event));
             }
         });
-        
+
         // Trigger Ready event due to AwaitReady call in JDA instance creation
         publisher.publishEvent(new PayloadApplicationEvent<>(jda, new ReadyEvent(jda)));
     }
