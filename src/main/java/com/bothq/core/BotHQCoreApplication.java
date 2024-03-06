@@ -1,13 +1,14 @@
-package com.bothq.core.bothqcore;
+package com.bothq.core;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BothqCoreApplication {
+public class BotHQCoreApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BothqCoreApplication.class, args);
+        // Initialize Spring
+        SpringApplication.run(BotHQCoreApplication.class, args);
     }
 
 }

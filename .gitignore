@@ -51,3 +51,5 @@ atlassian-ide-plugin.xml
 .vscode/
 
 cached-antora-playbook.yml
+jda.properties
+jda.yaml
