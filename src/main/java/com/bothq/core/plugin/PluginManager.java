@@ -121,7 +121,7 @@ public class PluginManager {
             log.debug("Found a total of {} .jar files inside of the plugins folder.", jarFiles.length);
 
             // Iterate over all files found
-            for (File jarFile : jarFiles) {
+            for (var jarFile : jarFiles) {
 
                 // Create a JarFile wrapper and URLClassLoader instance
                 try (var jar = new JarFile(jarFile);
@@ -163,7 +163,7 @@ public class PluginManager {
 
                 log.info("Loaded plugin: {} ({})", pluginInstance.getName(), jarFileName);
 
-                for (Method method : cls.getDeclaredMethods()) {
+                for (var method : cls.getDeclaredMethods()) {
                     if (method.isAnnotationPresent(DiscordEventListener.class)) {
                         // Non-static methods
                         eventListeners.put(method, method.getAnnotation(DiscordEventListener.class).value());
@@ -175,7 +175,7 @@ public class PluginManager {
             }
             else {
                 // Check for static methods
-                for (Method method : cls.getDeclaredMethods()) {
+                for (var method : cls.getDeclaredMethods()) {
                     if (Modifier.isStatic(method.getModifiers()) && method.isAnnotationPresent(DiscordEventListener.class)) {
                         // Static methods
                         eventListeners.put(method, method.getAnnotation(DiscordEventListener.class).value());
@@ -212,9 +212,9 @@ public class PluginManager {
     public void executeEventListeners(@NotNull GenericEvent event) {
 
         // Iterate over event listeners map
-        for (Map.Entry<Method, Class<?>[]> entry : eventListeners.entrySet()) {
+        for (var entry : eventListeners.entrySet()) {
             // Iterate over DiscordEventListener annotation content classes, e.g. ReadyEvent
-            for (Class<?> eventType : entry.getValue()) {
+            for (var eventType : entry.getValue()) {
                 // Verify that content class matches current fired event type
                 if (eventType.isAssignableFrom(event.getClass())) {
                     try {
@@ -224,7 +224,7 @@ public class PluginManager {
                             entry.getKey().invoke(null, event);
                         } else {
                             // Non-static method invocation, needs an instance
-                            for (IPlugin plugin : loadedPlugins) {
+                            for (var plugin : loadedPlugins) {
                                 // Check if instance of loaded plugin matches
                                 if (entry.getKey().getDeclaringClass().isInstance(plugin)) {
                                     // Non-static method invocation
