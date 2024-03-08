@@ -33,6 +33,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("com.bothq.lib:bothq-lib")
+    implementation("javax.annotation:javax.annotation-api:1.3.2")
 }
 
 tasks.withType<Test> {
