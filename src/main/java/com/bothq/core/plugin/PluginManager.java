@@ -183,7 +183,7 @@ public class PluginManager {
                 }
             }
         } catch (Exception e) {
-            log.error("Error during plugin class loading!", e);
+            log.error("Error during plugin class loading for plugin '{}'!", jarFileName, e);
         }
     }
 
