@@ -7,10 +7,14 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import okhttp3.OkHttpClient;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 
 @AutoConfiguration
 @EnableConfigurationProperties(JdaConfiguration.class)
@@ -24,12 +28,24 @@ public class JdaAutoConfiguration {
     @ConditionalOnMissingBean
     public JDA jda() throws InterruptedException {
 
-        return JDABuilder.createDefault(jdaConfiguration.getToken())
+        // Create the base builder
+        var builder = JDABuilder.createDefault(jdaConfiguration.getToken())
                 .setStatus(OnlineStatus.ONLINE)
                 .enableCache(CacheFlag.MEMBER_OVERRIDES)
-                .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-                .build()
-                .awaitReady();
+                .enableIntents(GatewayIntent.MESSAGE_CONTENT);
+
+        // Check if a proxy was set
+        if (jdaConfiguration.getProxyHost() != null && !jdaConfiguration.getProxyHost().isBlank()) {
+            // Apply proxy settings
+            builder.setHttpClientBuilder(
+                    new OkHttpClient.Builder().proxy(
+                            new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
+                                    jdaConfiguration.getProxyHost(),
+                                    jdaConfiguration.getProxyPort()))));
+        }
+
+        // Build, await ready and return
+        return builder.build().awaitReady();
 
     }
 }
