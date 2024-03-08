@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -172,8 +173,7 @@ public class PluginManager {
 
                 // Store class instance in collection
                 loadedPlugins.add(pluginInstance);
-            }
-            else {
+            } else {
                 // Check for static methods
                 for (var method : cls.getDeclaredMethods()) {
                     if (Modifier.isStatic(method.getModifiers()) && method.isAnnotationPresent(DiscordEventListener.class)) {
@@ -209,35 +209,51 @@ public class PluginManager {
     }
 
     @EventListener(GenericEvent.class)
-    public void executeEventListeners(@NotNull GenericEvent event) {
+    private void executeEventListeners(@NotNull GenericEvent event) {
 
         // Iterate over event listeners map
         for (var entry : eventListeners.entrySet()) {
+            // Create variables
+            var method = entry.getKey();
+            var classes = entry.getValue();
+
             // Iterate over DiscordEventListener annotation content classes, e.g. ReadyEvent
-            for (var eventType : entry.getValue()) {
+            for (var eventType : classes) {
                 // Verify that content class matches current fired event type
                 if (eventType.isAssignableFrom(event.getClass())) {
                     try {
-                        // Static method check
-                        if (Modifier.isStatic(entry.getKey().getModifiers())) {
-                            // Static method invocation
-                            entry.getKey().invoke(null, event);
-                        } else {
-                            // Non-static method invocation, needs an instance
-                            for (var plugin : loadedPlugins) {
-                                // Check if instance of loaded plugin matches
-                                if (entry.getKey().getDeclaringClass().isInstance(plugin)) {
-                                    // Non-static method invocation
-                                    entry.getKey().invoke(plugin, event);
-                                    break;
-                                }
-                            }
-                        }
+                        // Invoke method, passing the event object
+                        method.invoke(getPluginInstance(method), event);
                     } catch (Exception e) {
                         log.error("Error during plugin event invocation for event '{}'!", event.getClass().getTypeName(), e);
                     }
                 }
             }
         }
+    }
+
+    @Nullable
+    private IPlugin getPluginInstance(Method method) {
+        // Prepare return object
+        IPlugin instance = null;
+
+        // Non-static method check
+        if (!Modifier.isStatic(method.getModifiers())) {
+            // Search for the instance
+            for (var plugin : loadedPlugins) {
+                // Check if instance of loaded plugin matches
+                if (method.getDeclaringClass().isInstance(plugin)) {
+                    // Apply instance
+                    instance = plugin;
+                    break;
+                }
+            }
+
+            // No instance found, throw exception
+            throw new RuntimeException("Plugin instance for registered event method was not found!");
+        }
+
+        // Return found instance, or null if it's a static method
+        return instance;
     }
 }
