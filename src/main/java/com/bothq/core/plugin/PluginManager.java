@@ -3,7 +3,6 @@ package com.bothq.core.plugin;
 import com.bothq.lib.annotations.DiscordEventListener;
 import com.bothq.lib.interfaces.IPlugin;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -11,10 +10,11 @@ import net.dv8tion.jda.api.events.session.ReadyEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -29,8 +29,7 @@ import java.util.jar.JarFile;
 /**
  * The plugin manager that handles the initialization of plugin instances via reflection and dependency injection.
  */
-@Component
-@RequiredArgsConstructor
+@Service
 @Slf4j
 public class PluginManager {
     /**
@@ -49,10 +48,18 @@ public class PluginManager {
     @Getter
     private final List<IPlugin> loadedPlugins = new ArrayList<>();
 
+    private final Map<String, URLClassLoader> classLoaders = new HashMap<>();
+
     /**
      * The collection of event listeners of the plugins.
      */
     private final Map<Method, Class<?>[]> eventListeners = new HashMap<>();
+
+    public PluginManager(JDA jda) {
+
+        // Apply fields
+        this.jda = jda;
+    }
 
     /**
      * Unloads all plugins and loads all plugins from the plugin folder.
@@ -88,17 +95,15 @@ public class PluginManager {
     }
 
     private void loadPlugins() {
+
         // Create plugins directory wrapper
         File pluginsDir = new File(pluginFolderName);
 
         // Check if directory exists
         if (!pluginsDir.exists()) {
 
-            // Create the folder
-            var created = pluginsDir.mkdirs();
-
             // Check if the folder was not created
-            if (!created) {
+            if (!pluginsDir.mkdirs()) {
                 log.error("Failed to create 'plugins' directory, aborting plugin load!");
 
                 // Abort code execution at this point, as we don't have a working directory
@@ -116,22 +121,40 @@ public class PluginManager {
         }
 
         // Get a collection of files that end with .jar inside the plugins folder
-        var jarFiles = pluginsDir.listFiles((dir, name) -> name.endsWith(".jar"));
+        var jarFiles = pluginsDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".jar"));
         if (jarFiles != null) {
 
-            log.debug("Found a total of {} .jar files inside of the plugins folder.", jarFiles.length);
+            log.info("Found a total of {} .jar files inside of the plugins folder.", jarFiles.length);
 
             // Iterate over all files found
             for (var jarFile : jarFiles) {
 
-                // Create a JarFile wrapper and URLClassLoader instance
-                try (var jar = new JarFile(jarFile);
-                     var classLoader = URLClassLoader.newInstance(new URL[]{jarFile.toURI().toURL()})) {
+                var fileName = jarFile.getName();
+                URLClassLoader classLoader = null;
 
-                    // Iterate over jar entries and load classes implementing IPlugin
-                    jar.stream().forEach(jarEntry -> loadPluginClass(jarEntry, classLoader, jarFile.getName()));
+                try {
+                    // Create class loader
+                    classLoader = createClassLoaderWithDependencies(jarFile);
+
+                    // Store the class loader
+                    classLoaders.put(jarFile.getName(), classLoader);
+
+                    try (var jar = new JarFile(jarFile)) {
+                        // Iterate over jar entries and load classes implementing IPlugin
+                        URLClassLoader finalClassLoader = classLoader;
+                        jar.stream().forEach(jarEntry -> loadPluginClass(jarEntry, finalClassLoader, fileName));
+                    }
                 } catch (Exception e) {
                     log.error("Error during plugin jar file parsing!", e);
+
+                    // Remove and close class loader
+                    if (classLoader != null) {
+                        try {
+                            classLoaders.remove(fileName);
+                            classLoader.close();
+                        } catch (Exception ignored) {
+                        }
+                    }
                 }
             }
         }
@@ -162,12 +185,15 @@ public class PluginManager {
                 // Create a new instance of the valid class
                 var pluginInstance = (IPlugin) cls.getDeclaredConstructor().newInstance();
 
-                log.info("Loaded plugin: {} ({})", pluginInstance.getName(), jarFileName);
+                log.info("Loaded plugin: {} ({})", className, jarFileName);
 
                 for (var method : cls.getDeclaredMethods()) {
                     if (method.isAnnotationPresent(DiscordEventListener.class)) {
+
                         // Non-static methods
                         eventListeners.put(method, method.getAnnotation(DiscordEventListener.class).value());
+
+                        log.info("Added event listener: {}.{} ({})", className, method.getName(), jarFileName);
                     }
                 }
 
@@ -177,8 +203,11 @@ public class PluginManager {
                 // Check for static methods
                 for (var method : cls.getDeclaredMethods()) {
                     if (Modifier.isStatic(method.getModifiers()) && method.isAnnotationPresent(DiscordEventListener.class)) {
+
                         // Static methods
                         eventListeners.put(method, method.getAnnotation(DiscordEventListener.class).value());
+
+                        log.info("Added static event listener: {}.{} ({})", className, method.getName(), jarFileName);
                     }
                 }
             }
@@ -199,11 +228,23 @@ public class PluginManager {
                 log.error("Error during unload of plugin '{}'! Unloading anyway...", plugin.getName(), e);
             }
 
-            log.debug("Unloaded plugin: {}", plugin.getName());
+            log.info("Unloaded plugin: {}", plugin.getName());
         }
 
         // Clear collection
         loadedPlugins.clear();
+
+        // Clear class loader instances
+        for (var entry : classLoaders.entrySet()) {
+            try {
+                // Close the loader
+                entry.getValue().close();
+            } catch (IOException ignored) {
+            }
+        }
+
+        // Clear collection
+        classLoaders.clear();
 
         log.info("Unloaded all plugins.");
     }
@@ -249,11 +290,27 @@ public class PluginManager {
                 }
             }
 
-            // No instance found, throw exception
-            throw new RuntimeException("Plugin instance for registered event method was not found!");
+            if (instance == null) {
+                // No instance found, throw exception
+                throw new RuntimeException("Plugin instance for registered event method was not found!");
+            }
         }
 
         // Return found instance, or null if it's a static method
         return instance;
+    }
+
+    private URLClassLoader createClassLoaderWithDependencies(File jarFile) throws Exception {
+        // Convert the jarFile to a URL
+        var jarUrl = jarFile.toURI().toURL();
+
+        // Create a list for all URLs you want to load classes from
+        List<URL> urls = new ArrayList<>();
+        urls.add(jarUrl);
+
+        // Additional dependencies can be added to 'urls' if necessary
+
+        // Create a new URLClassLoader with the specified URLs and the current Thread's context class loader as the parent
+        return new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
     }
 }
