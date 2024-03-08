@@ -9,4 +9,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.discord")
 public class JdaConfiguration {
     private String token;
+    private String proxyHost;
+    private int proxyPort;
 }
