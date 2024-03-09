@@ -18,6 +18,7 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -63,6 +64,9 @@ public class PluginLoaderService {
 
         // Load all plugins
         loadPlugins();
+
+        // Order all plugins
+        orderPlugins();
 
         // Initialize plugins
         for (var plugin : loadedPlugins) {
@@ -245,6 +249,11 @@ public class PluginLoaderService {
         loadedPlugins.clear();
 
         log.info("Unloaded all plugins.");
+    }
+
+    private void orderPlugins() {
+        // Order plugins in alphabetical order by their file name
+        loadedPlugins.sort(Comparator.comparing(LoadedPlugin::getFileName));
     }
 
     private URLClassLoader createClassLoaderWithDependencies(File jarFile) throws Exception {
