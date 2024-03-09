@@ -1,29 +1,24 @@
 package com.bothq.core.service;
 
+import com.bothq.core.plugin.LoadedPlugin;
 import com.bothq.lib.annotations.DiscordEventListener;
 import com.bothq.lib.interfaces.IPlugin;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -45,17 +40,15 @@ public class PluginLoaderService {
     private final JDA jda;
 
     /**
+     * The Spring event publisher.
+     */
+    private final ApplicationEventPublisher eventPublisher;
+
+    /**
      * The collection of loaded plugins in alphabetical order.
      */
     @Getter
-    private final List<IPlugin> loadedPlugins = new ArrayList<>();
-
-    private final Map<String, URLClassLoader> classLoaders = new HashMap<>();
-
-    /**
-     * The collection of event listeners of the plugins.
-     */
-    private final Map<Method, Class<?>[]> eventListeners = new HashMap<>();
+    private final List<LoadedPlugin> loadedPlugins = new ArrayList<>();
 
     /**
      * Unloads all plugins and loads all plugins from the plugin folder.
@@ -64,9 +57,6 @@ public class PluginLoaderService {
     public void reloadPlugins() {
 
         log.info("Reloading plugins...");
-
-        // Clear event listeners
-        eventListeners.clear();
 
         // Unload all current plugins
         unloadPlugins();
@@ -81,11 +71,11 @@ public class PluginLoaderService {
             plugin.initialize(jda);
 
             // Trigger load method
-            plugin.pluginLoad();
+            plugin.load();
         }
 
         // JDA is ready at this point, so we trigger the ready event as well
-        executeEventListeners(new ReadyEvent(jda));
+        eventPublisher.publishEvent(new PayloadApplicationEvent<>(jda, new ReadyEvent(jda)));
 
         log.info("Reloading plugins done!");
     }
@@ -127,26 +117,40 @@ public class PluginLoaderService {
 
                 var fileName = jarFile.getName();
                 URLClassLoader classLoader = null;
+                LoadedPlugin loadedPlugin = null;
 
-                try {
+                try (var jar = new JarFile(jarFile)) {
                     // Create class loader
                     classLoader = createClassLoaderWithDependencies(jarFile);
 
-                    // Store the class loader
-                    classLoaders.put(jarFile.getName(), classLoader);
+                    // Create plugin object
+                    loadedPlugin = new LoadedPlugin(fileName, classLoader);
 
-                    try (var jar = new JarFile(jarFile)) {
-                        // Iterate over jar entries and load classes implementing IPlugin
-                        URLClassLoader finalClassLoader = classLoader;
-                        jar.stream().forEach(jarEntry -> loadPluginClass(jarEntry, finalClassLoader, fileName));
+                    // Iterate over jar entries and load classes implementing IPlugin
+                    LoadedPlugin finalLoadedPlugin = loadedPlugin;
+                    jar.stream().forEach(jarEntry -> {
+                        // Attempt to load plugin from jar entry
+                        loadPluginClass(jarEntry, finalLoadedPlugin, fileName);
+                    });
+
+                    // Check if the plugin had data to be loaded
+                    if (loadedPlugin.hasData()) {
+                        // Add loaded plugin to collection
+                        loadedPlugins.add(loadedPlugin);
+                    } else {
+                        // Close the plugin, as nothing was loaded into it which is being used
+                        loadedPlugin.close();
                     }
                 } catch (Exception e) {
                     log.error("Error during plugin jar file parsing!", e);
 
-                    // Remove and close class loader
-                    if (classLoader != null) {
+                    if (loadedPlugin != null) {
                         try {
-                            classLoaders.remove(fileName);
+                            loadedPlugin.close();
+                        } catch (Exception ignored) {
+                        }
+                    } else if (classLoader != null) {
+                        try {
                             classLoader.close();
                         } catch (Exception ignored) {
                         }
@@ -156,7 +160,14 @@ public class PluginLoaderService {
         }
     }
 
-    private void loadPluginClass(JarEntry jarEntry, URLClassLoader classLoader, String jarFileName) {
+    /**
+     * Loads a plugin class by its {@link JarEntry}, using the specified class loader inside the plugin.
+     *
+     * @param jarEntry    The jar entry.
+     * @param plugin      The plugin.
+     * @param jarFileName The name of the jar file.
+     */
+    private void loadPluginClass(JarEntry jarEntry, LoadedPlugin plugin, String jarFileName) {
 
         // Verify entry is a class
         if (!jarEntry.getName().endsWith(".class")) {
@@ -168,7 +179,7 @@ public class PluginLoaderService {
             String className = jarEntry.getName().replace('/', '.').substring(0, jarEntry.getName().length() - 6);
 
             // Load the class
-            Class<?> cls = Class.forName(className, true, classLoader);
+            Class<?> cls = Class.forName(className, true, plugin.getClassLoader());
 
             // Check if class is an interface
             if (cls.isInterface()) {
@@ -187,21 +198,21 @@ public class PluginLoaderService {
                     if (method.isAnnotationPresent(DiscordEventListener.class)) {
 
                         // Non-static methods
-                        eventListeners.put(method, method.getAnnotation(DiscordEventListener.class).value());
+                        plugin.getEventListeners().put(method, method.getAnnotation(DiscordEventListener.class).value());
 
                         log.info("Added event listener: {}.{} ({})", className, method.getName(), jarFileName);
                     }
                 }
 
                 // Store class instance in collection
-                loadedPlugins.add(pluginInstance);
+                plugin.getPluginInstances().add(pluginInstance);
             } else {
                 // Check for static methods
                 for (var method : cls.getDeclaredMethods()) {
                     if (Modifier.isStatic(method.getModifiers()) && method.isAnnotationPresent(DiscordEventListener.class)) {
 
                         // Static methods
-                        eventListeners.put(method, method.getAnnotation(DiscordEventListener.class).value());
+                        plugin.getEventListeners().put(method, method.getAnnotation(DiscordEventListener.class).value());
 
                         log.info("Added static event listener: {}.{} ({})", className, method.getName(), jarFileName);
                     }
@@ -210,90 +221,30 @@ public class PluginLoaderService {
         } catch (Exception e) {
             log.error("Error during plugin class loading for plugin '{}'!", jarFileName, e);
         }
+
     }
 
     private void unloadPlugins() {
 
-        // Iterate over all loaded plugins
         for (var plugin : loadedPlugins) {
 
+            // Unload the plugin
+            plugin.unload();
+
             try {
-                // Execute plugin unload
-                plugin.pluginUnload();
-            } catch (Exception e) {
-                log.error("Error during unload of plugin '{}'! Unloading anyway...", plugin.getName(), e);
+                // Close the plugin
+                plugin.close();
+            } catch (Exception ignored) {
+                // Ignored
             }
 
-            log.info("Unloaded plugin: {}", plugin.getName());
+            log.info("Unloaded plugin file '{}'", plugin.getFileName());
         }
 
-        // Clear collection
+        // Clear the collection
         loadedPlugins.clear();
 
-        // Clear class loader instances
-        for (var entry : classLoaders.entrySet()) {
-            try {
-                // Close the loader
-                entry.getValue().close();
-            } catch (IOException ignored) {
-            }
-        }
-
-        // Clear collection
-        classLoaders.clear();
-
         log.info("Unloaded all plugins.");
-    }
-
-    @EventListener(GenericEvent.class)
-    private void executeEventListeners(@NotNull GenericEvent event) {
-
-        // Iterate over event listeners map
-        for (var entry : eventListeners.entrySet()) {
-            // Create variables
-            var method = entry.getKey();
-            var classes = entry.getValue();
-
-            // Iterate over DiscordEventListener annotation content classes, e.g. ReadyEvent
-            for (var eventType : classes) {
-                // Verify that content class matches current fired event type
-                if (eventType.isAssignableFrom(event.getClass())) {
-                    try {
-                        // Invoke method, passing the event object
-                        method.invoke(getPluginInstance(method), event);
-                    } catch (Exception e) {
-                        log.error("Error during plugin event invocation for event '{}'!", event.getClass().getTypeName(), e);
-                    }
-                }
-            }
-        }
-    }
-
-    @Nullable
-    private IPlugin getPluginInstance(Method method) {
-        // Prepare return object
-        IPlugin instance = null;
-
-        // Non-static method check
-        if (!Modifier.isStatic(method.getModifiers())) {
-            // Search for the instance
-            for (var plugin : loadedPlugins) {
-                // Check if instance of loaded plugin matches
-                if (method.getDeclaringClass().isInstance(plugin)) {
-                    // Apply instance
-                    instance = plugin;
-                    break;
-                }
-            }
-
-            if (instance == null) {
-                // No instance found, throw exception
-                throw new RuntimeException("Plugin instance for registered event method was not found!");
-            }
-        }
-
-        // Return found instance, or null if it's a static method
-        return instance;
     }
 
     private URLClassLoader createClassLoaderWithDependencies(File jarFile) throws Exception {
