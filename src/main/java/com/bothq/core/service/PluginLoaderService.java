@@ -1,8 +1,9 @@
-package com.bothq.core.plugin;
+package com.bothq.core.service;
 
 import com.bothq.lib.annotations.DiscordEventListener;
 import com.bothq.lib.interfaces.IPlugin;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -31,7 +32,8 @@ import java.util.jar.JarFile;
  */
 @Service
 @Slf4j
-public class PluginManager {
+@RequiredArgsConstructor
+public class PluginLoaderService {
     /**
      * The folder name in which the plugin .jar files are stored.
      */
@@ -54,12 +56,6 @@ public class PluginManager {
      * The collection of event listeners of the plugins.
      */
     private final Map<Method, Class<?>[]> eventListeners = new HashMap<>();
-
-    public PluginManager(JDA jda) {
-
-        // Apply fields
-        this.jda = jda;
-    }
 
     /**
      * Unloads all plugins and loads all plugins from the plugin folder.

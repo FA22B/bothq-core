@@ -1,6 +1,6 @@
 package com.bothq.core;
 
-import com.bothq.core.plugin.PluginManager;
+import com.bothq.core.service.PluginLoaderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 public class ConsoleCommandListener implements CommandLineRunner {
 
-    private final PluginManager pluginManager;
+    private final PluginLoaderService pluginLoaderService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -51,7 +51,7 @@ public class ConsoleCommandListener implements CommandLineRunner {
                     case "reload":
                         // Reload all plugins
                         // TODO: Add option to reload a single plugin only
-                        pluginManager.reloadPlugins();
+                        pluginLoaderService.reloadPlugins();
                         break;
 
                     case "help":
