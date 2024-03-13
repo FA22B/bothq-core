@@ -1,5 +1,6 @@
 package com.bothq.core.service;
 
+import com.bothq.core.event.PluginFileChangedEvent;
 import com.bothq.core.plugin.LoadedPlugin;
 import com.bothq.lib.annotations.DiscordEventListener;
 import com.bothq.lib.interfaces.IPlugin;
@@ -10,13 +11,19 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.PayloadApplicationEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -34,6 +41,19 @@ public class PluginLoaderService {
      * The folder name in which the plugin .jar files are stored.
      */
     public static final String pluginFolderName = "plugins";
+
+    /**
+     * The temporary folder in which the plugins are actually loaded from.
+     */
+    public static final Path tempPluginFolderPath;
+
+    static {
+        try {
+            tempPluginFolderPath = Path.of(String.valueOf(Files.createTempDirectory(Paths.get(System.getProperty("java.io.tmpdir")), "bothq")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * The JDA instance.
@@ -55,6 +75,7 @@ public class PluginLoaderService {
      * Unloads all plugins and loads all plugins from the plugin folder.
      */
     @PostConstruct
+    @EventListener(PluginFileChangedEvent.class)
     public void reloadPlugins() {
 
         log.info("Reloading plugins...");
@@ -118,14 +139,27 @@ public class PluginLoaderService {
 
             // Iterate over all files found
             for (var jarFile : jarFiles) {
-
                 var fileName = jarFile.getName();
+
+                // Prepare the target file path
+                Path targetFilePath;
+                File targetFile;
+
+                try {
+                    // Copy file to temp folder
+                    targetFilePath = Files.copy(jarFile.toPath(), tempPluginFolderPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+                    targetFile = targetFilePath.toFile();
+                } catch (IOException e) {
+                    log.error("Error trying to copy plugin '{}' to temp directory!", fileName, e);
+                    continue;
+                }
+
                 URLClassLoader classLoader = null;
                 LoadedPlugin loadedPlugin = null;
 
-                try (var jar = new JarFile(jarFile)) {
+                try (var jar = new JarFile(targetFile)) {
                     // Create class loader
-                    classLoader = createClassLoaderWithDependencies(jarFile);
+                    classLoader = createClassLoaderWithDependencies(targetFile);
 
                     // Create plugin object
                     loadedPlugin = new LoadedPlugin(fileName, classLoader);
