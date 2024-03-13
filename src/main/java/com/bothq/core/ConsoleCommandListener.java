@@ -1,5 +1,6 @@
 package com.bothq.core;
 
+import com.bothq.core.service.PluginFileWatcherService;
 import com.bothq.core.service.PluginLoaderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import java.util.List;
 public class ConsoleCommandListener implements CommandLineRunner {
 
     private final PluginLoaderService pluginLoaderService;
+    private final PluginFileWatcherService pluginFileWatcherService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -54,10 +56,20 @@ public class ConsoleCommandListener implements CommandLineRunner {
                         pluginLoaderService.reloadPlugins();
                         break;
 
+                    case "toggle-plugin-watcher":
+                        // Toggle plugin folder watch service
+                        if (pluginFileWatcherService.isWatching()) {
+                            pluginFileWatcherService.stopWatching();
+                        } else {
+                            pluginFileWatcherService.startWatching();
+                        }
+                        break;
+
                     case "help":
                         // Display available commands or help information
                         log.info("Available commands:");
                         log.info("reload - Reloads all plugins");
+                        log.info("toggle-plugin-watcher - Toggles plugin folder watch service");
                         log.info("help - Displays this help message");
                         break;
 
