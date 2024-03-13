@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties("spring.discord")
 public class JdaConfiguration {
-    private String token;
+    private String botToken;
     private String proxyHost;
     private int proxyPort;
 }
