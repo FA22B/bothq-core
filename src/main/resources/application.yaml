@@ -19,3 +19,14 @@ spring:
             token-uri: https://discordapp.com/api/oauth2/token
             user-info-uri: https://discordapp.com/api/users/@me
             user-name-attribute: id
+
+logging:
+  level:
+    web: trace
+    security: trace
+    org.springframework.security: trace
+
+
+frontend:
+  redirect-uri: http://localhost:4200/redirect?success=true
+  redirect-error-uri: http://localhost:4200/redirect
