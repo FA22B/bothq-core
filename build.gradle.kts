@@ -29,6 +29,8 @@ dependencies {
     // handles oauth authentication with discord
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    // we still use the servlet way of handling things, however we need the webflux WebClient to use the OAuth Client
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     compileOnly("org.projectlombok:lombok")
 

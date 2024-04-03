@@ -1,8 +1,7 @@
 package com.bothq.core.bothqcore.auth;
 
-import com.bothq.core.bothqcore.auth.user.AuthenticatedDiscordUser;
 import net.dv8tion.jda.api.Permission;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,26 +11,36 @@ import org.springframework.stereotype.Component;
  */
 @Component("discordPermissionEvaluator")
 public class DiscordGuildPermissionEvaluator {
-    public boolean hasPermission(String guildId, String permissionName) {
-        AuthenticatedDiscordUser discordUser = (AuthenticatedDiscordUser) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
 
-        if (!discordUser.getGuilds().containsKey(guildId)){
+    private final ObjectProvider<UserInfoProvider> userInfoProviders;
+
+    public DiscordGuildPermissionEvaluator(ObjectProvider<UserInfoProvider> userInfoProviders) {
+        this.userInfoProviders = userInfoProviders;
+    }
+
+
+    public UserInfoProvider getUserInfoProvider() {
+        return userInfoProviders.getObject();
+    }
+
+    public boolean hasPermission(String guildId, Permission permission) {
+        if (!getUserInfoProvider()
+                .getGuilds()
+                .containsKey(guildId)){
             // throw new AccessDeniedException("User is not a member of the guild with id '" + guildId + "'");
 
             return false;
         }
 
-        Permission permission = Permission.valueOf(permissionName.toUpperCase());
-
-        System.out.println(permission);
-
-        return discordUser
+        return getUserInfoProvider()
                 .getGuilds()
                     .get(guildId)
                 .getPermissions()
                     .contains(permission);
+    }
+
+
+    public boolean hasPermission(String guildId, String permissionName) throws IllegalArgumentException {
+        return hasPermission(guildId, Permission.valueOf(permissionName));
     }
 }

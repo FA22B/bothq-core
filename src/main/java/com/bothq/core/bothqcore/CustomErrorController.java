@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CustomErrorController implements ErrorController {
     @RequestMapping("/error")
     public ResponseEntity<String> handleError() {
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>("Test", HttpStatus.I_AM_A_TEAPOT);
 
 //        return ResponseEntity
 //                .status(HttpStatus.NOT_FOUND)

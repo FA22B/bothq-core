@@ -2,6 +2,13 @@ spring:
   config:
     import: classpath:secrets.yaml
 
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration
+
+
+
   security:
     oauth2:
       client:
@@ -24,9 +31,21 @@ logging:
   level:
     web: trace
     security: trace
-    org.springframework.security: trace
+    # org.springframework.security: trace
 
 
 frontend:
   redirect-uri: http://localhost:4200/redirect?success=true
   redirect-error-uri: http://localhost:4200/redirect
+
+
+server:
+  servlet:
+    session:
+      persistent: false
+#  error:
+#    whitelabel:
+#      enabled: false
+
+
+# debug: true
