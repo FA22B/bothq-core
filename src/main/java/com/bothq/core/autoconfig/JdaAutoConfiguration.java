@@ -29,7 +29,7 @@ public class JdaAutoConfiguration {
     public JDA jda() throws InterruptedException {
 
         // Create the base builder
-        var builder = JDABuilder.createDefault(jdaConfiguration.getToken())
+        var builder = JDABuilder.createDefault(jdaConfiguration.getBotToken())
                 .setStatus(OnlineStatus.ONLINE)
                 .enableCache(CacheFlag.MEMBER_OVERRIDES)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT);

@@ -1,3 +1,21 @@
 spring:
   config:
-    import: classpath:jda.yaml
+    import: classpath:secrets.yaml
+
+  security:
+    oauth2:
+      client:
+        registration:
+          discord-client:
+            provider: discord
+            client-id: 1204752151499251803
+            client-secret: ${spring.discord.client-secret}
+            authorization-grant-type: authorization_code
+            scope: identify, guilds
+            redirect-uri: http://localhost:8080/login/oauth2/code/discord
+        provider:
+          discord:
+            authorization-uri: https://discordapp.com/api/oauth2/authorize
+            token-uri: https://discordapp.com/api/oauth2/token
+            user-info-uri: https://discordapp.com/api/users/@me
+            user-name-attribute: id
