@@ -1,7 +1,7 @@
 package com.bothq.core.service;
 
 import com.bothq.core.plugin.LoadedPlugin;
-import com.bothq.lib.interfaces.IPlugin;
+import com.bothq.lib.plugin.IPlugin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.GenericEvent;

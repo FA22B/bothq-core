@@ -1,5 +1,6 @@
 package com.bothq.core.plugin;
 
+import com.bothq.core.plugin.config.Config;
 import com.bothq.lib.plugin.IPlugin;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,11 @@ public class LoadedPlugin implements Closeable {
      * The class loader which this plugin is loaded into.
      */
     private final URLClassLoader classLoader;
+
+    /**
+     * The config.
+     */
+    private final Config config = new Config("debug", "Debug"); // TODO: Pass actual config from future SQL service
 
     /**
      * The instances of {@link IPlugin} created.
@@ -76,7 +82,7 @@ public class LoadedPlugin implements Closeable {
         for (var plugin : pluginInstances) {
             try {
                 // Trigger initialize
-                plugin.initialize(jda, null); // TODO: Pass config instance
+                plugin.initialize(jda, config);
             } catch (Exception e) {
                 log.error("Error during initialization of plugin '{}' ({})!", plugin.getName(), fileName, e);
             }
