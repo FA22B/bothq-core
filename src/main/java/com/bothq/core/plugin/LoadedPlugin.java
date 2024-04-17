@@ -33,7 +33,7 @@ public class LoadedPlugin implements Closeable {
     /**
      * The config.
      */
-    private final Config config = new Config(fileName, fileName); // TODO: Pass actual config from future SQL service
+    private final Config config = new Config("debug", "Debug"); // TODO: Pass actual config from future SQL service
 
     /**
      * The instances of {@link IPlugin} created.
