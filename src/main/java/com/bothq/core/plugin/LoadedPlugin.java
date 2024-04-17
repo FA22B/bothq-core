@@ -1,6 +1,6 @@
 package com.bothq.core.plugin;
 
-import com.bothq.lib.interfaces.IPlugin;
+import com.bothq.lib.plugin.IPlugin;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +76,7 @@ public class LoadedPlugin implements Closeable {
         for (var plugin : pluginInstances) {
             try {
                 // Trigger initialize
-                plugin.initialize(jda);
+                plugin.initialize(jda, null); // TODO: Pass config instance
             } catch (Exception e) {
                 log.error("Error during initialization of plugin '{}' ({})!", plugin.getName(), fileName, e);
             }
