@@ -1,8 +1,6 @@
-package com.bothq.core.api;
+package com.bothq.core.rest;
 
-import com.bothq.core.api.model.MemberInfo;
-import com.bothq.core.api.model.PluginConfig;
-import com.bothq.core.api.model.ServerInfo;
+import com.bothq.core.entity.UserInfo;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,16 +13,12 @@ import java.util.List;
 public class UserServerController {
 
     @GetMapping("/{serverId}/plugins")
-    public List<PluginConfig> getAllPlugins(@PathVariable String serverId) {
-        return List.of(
-                new PluginConfig("1", "Plugin1"),
-                new PluginConfig("2", "Plugin2"),
-                new PluginConfig("3", "Plugin3")
-        );
+    public List<String> getAllPlugins(@PathVariable String serverId) {
+        return List.of("Plugin1", "Plugin2", "Plugin3");
     }
 
     @PutMapping("/{serverId}/plugins/{pluginId}")
-    public String updatePluginConfig(@PathVariable String serverId, @RequestBody PluginConfig config) {
+    public String updatePluginConfig(@PathVariable String serverId, @RequestBody String config) {
         return "Plugin configuration updated successfully";
     }
 
@@ -44,16 +38,16 @@ public class UserServerController {
     }
 
     @GetMapping("/{serverId}")
-    public ServerInfo getServerInfo(@PathVariable String serverId) {
-        return new ServerInfo("1", "Server1");
+    public String getServerInfo(@PathVariable String serverId) {
+        return "Server1";
     }
 
     @GetMapping("/{serverId}/members")
-    public List<MemberInfo> getMemberList(@PathVariable String serverId) {
+    public List<UserInfo> getMemberList(@PathVariable String serverId) {
         return List.of(
-                new MemberInfo("1", "Member1", "max@payne.de"),
-                new MemberInfo("2", "Member2", "muh@kuh.de"),
-                new MemberInfo("3", "Member3", "Emil@email.de")
+                new UserInfo(1, "Member1", "max@payne.de"),
+                new UserInfo(2, "Member2", "muh@kuh.de"),
+                new UserInfo(3, "Member3", "Emil@email.de")
         );
     }
 }

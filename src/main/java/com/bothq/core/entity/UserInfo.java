@@ -1,4 +1,4 @@
-package com.bothq.core.api.model;
+package com.bothq.core.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -8,12 +8,14 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Entity
-public class ServerInfo {
+public class UserInfo {
     @Id
-    private String id;
+    private long id;
     private String name;
+    private String email;
 
-    public ServerInfo() {
+
+    public UserInfo() {
 
     }
 }
