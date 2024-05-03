@@ -1,10 +1,14 @@
 package com.bothq.core.rest;
 
+import com.bothq.core.entity.PluginConfiguration;
 import com.bothq.core.entity.UserInfo;
+import com.bothq.core.repository.PluginConfigurationRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @ControllerAdvice
 @RestController
@@ -12,9 +16,20 @@ import java.util.List;
 @RequestMapping("/api/v1/servers")
 public class UserServerController {
 
+    private PluginConfigurationRepository pluginConfigurationRepository;
+
     @GetMapping("/{serverId}/plugins")
     public List<String> getAllPlugins(@PathVariable String serverId) {
         return List.of("Plugin1", "Plugin2", "Plugin3");
+    }
+
+    @GetMapping("/{serverId}/plugins/{pluginId}")
+    public ResponseEntity<Map<String, Object>> getPluginConfiguration(@PathVariable Long serverId, @PathVariable Long pluginId) {
+        return pluginConfigurationRepository.findById(pluginId)
+                .filter(plugin -> plugin.getServer().getId().equals(serverId)) // Ensure the plugin belongs to the server
+                .map(PluginConfiguration::getProperties)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{serverId}/plugins/{pluginId}")
