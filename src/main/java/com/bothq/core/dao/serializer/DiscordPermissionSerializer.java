@@ -1,4 +1,4 @@
-package com.bothq.core.bothqcore.dao;
+package com.bothq.core.dao.serializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -11,6 +11,6 @@ import java.util.EnumSet;
 public class DiscordPermissionSerializer extends JsonSerializer<EnumSet<Permission>> {
     @Override
     public void serialize(EnumSet<Permission> value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        gen.writeNumber(Permission.getRaw(value));
+        gen.writeString(String.valueOf(Permission.getRaw(value)));
     }
 }

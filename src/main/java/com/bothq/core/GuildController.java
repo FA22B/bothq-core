@@ -1,8 +1,8 @@
-package com.bothq.core.bothqcore;
+package com.bothq.core;
 
 
-import com.bothq.core.bothqcore.auth.UserInfoProvider;
-import com.bothq.core.bothqcore.dao.DiscordGuild;
+import com.bothq.core.auth.UserInfoProvider;
+import com.bothq.core.dao.DiscordGuild;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;

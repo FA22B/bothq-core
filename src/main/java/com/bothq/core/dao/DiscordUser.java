@@ -1,4 +1,4 @@
-package com.bothq.core.bothqcore.dao;
+package com.bothq.core.dao;
 
 
 import lombok.Getter;

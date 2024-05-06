@@ -1,4 +1,4 @@
-package com.bothq.core.bothqcore.auth;
+package com.bothq.core.auth;
 
 import net.dv8tion.jda.api.Permission;
 import org.springframework.beans.factory.ObjectProvider;

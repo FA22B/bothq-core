@@ -1,9 +1,9 @@
-package com.bothq.core.bothqcore.auth;
+package com.bothq.core.auth;
 
-import com.bothq.core.bothqcore.DiscordClient;
-import com.bothq.core.bothqcore.dao.DiscordGuild;
-import com.bothq.core.bothqcore.dao.DiscordGuildMap;
-import com.bothq.core.bothqcore.dao.DiscordUser;
+import com.bothq.core.service.DiscordClient;
+import com.bothq.core.dao.DiscordGuild;
+import com.bothq.core.dao.DiscordGuildMap;
+import com.bothq.core.dao.DiscordUser;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;

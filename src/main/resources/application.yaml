@@ -31,6 +31,10 @@ logging:
   level:
     web: trace
     security: trace
+    com.bothq: trace
+    org.springframework.http.codec.json: info
+    org.springframework.security: trace
+
     # org.springframework.security: trace
 
 
@@ -39,10 +43,10 @@ frontend:
   redirect-error-uri: http://localhost:4200/redirect
 
 
-server:
-  servlet:
-    session:
-      persistent: false
+# server:
+#  servlet:
+#    session:
+#      persistent: false
 #  error:
 #    whitelabel:
 #      enabled: false

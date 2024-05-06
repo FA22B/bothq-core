@@ -1,5 +1,7 @@
-package com.bothq.core.bothqcore.dao;
+package com.bothq.core.dao;
 
+import com.bothq.core.dao.serializer.DiscordPermissionDeserializer;
+import com.bothq.core.dao.serializer.DiscordPermissionSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;

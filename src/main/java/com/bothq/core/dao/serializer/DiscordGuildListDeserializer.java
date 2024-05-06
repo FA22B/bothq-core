@@ -1,5 +1,7 @@
-package com.bothq.core.bothqcore.dao;
+package com.bothq.core.dao.serializer;
 
+import com.bothq.core.dao.DiscordGuild;
+import com.bothq.core.dao.DiscordGuildMap;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;

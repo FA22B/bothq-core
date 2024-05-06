@@ -1,7 +1,6 @@
-package com.bothq.core.bothqcore.auth;
+package com.bothq.core.auth;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.authorization.AuthenticatedAuthorizationManager;

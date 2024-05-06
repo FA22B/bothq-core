@@ -1,4 +1,4 @@
-package com.bothq.core.bothqcore.config;
+package com.bothq.core.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

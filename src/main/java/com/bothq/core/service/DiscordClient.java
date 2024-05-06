@@ -1,4 +1,4 @@
-package com.bothq.core.bothqcore;
+package com.bothq.core.service;
 
 
 import com.github.benmanes.caffeine.cache.AsyncCache;
@@ -28,6 +28,7 @@ public class DiscordClient {
 
     public DiscordClient(OAuth2AuthorizedClientManager authorizedClientManager) {
         var oauth2Client = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+
         this.webClient = WebClient
                 .builder()
                     .apply(oauth2Client.oauth2Configuration())
