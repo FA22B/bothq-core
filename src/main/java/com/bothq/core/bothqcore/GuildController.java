@@ -32,7 +32,7 @@ public class GuildController {
     public DiscordGuild getGuild(@PathVariable String guildId){
         return getUserInfoProvider()
                 .getGuilds()
-                    .get(guildId);
+                .get(guildId);
     }
 }
 
