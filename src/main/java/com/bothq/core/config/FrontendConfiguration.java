@@ -10,6 +10,11 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("frontend")
 public class FrontendConfiguration {
+    /** URI to redirect to after successful log in.
+     */
     private String redirectUri;
+
+    /** URI to redirect to after failed log in.
+     */
     private String redirectErrorUri;
 }

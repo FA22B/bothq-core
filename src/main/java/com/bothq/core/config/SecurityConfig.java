@@ -29,28 +29,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    @Qualifier("GuildAuthManager")
-                                                   AuthorizationManager<RequestAuthorizationContext> guildAuthManager) throws Exception {
+                                                   AuthorizationManager<RequestAuthorizationContext> guildAuthManager,
+                                                   FrontendConfiguration frontendConfig) throws Exception {
         return http
                 .anonymous(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(matcher -> matcher
                         // Guild Trust resolver
                         .requestMatchers("/api/*/guild/**")
-                            .access(guildAuthManager)
+                        .access(guildAuthManager)
 
                         // Default API Trust Resolver
                         .requestMatchers("/api/**")
-                            .access(guildAuthManager)
+                        .access(guildAuthManager)
                         .requestMatchers("/error").permitAll()
-                            .anyRequest().denyAll()
+                        .anyRequest().denyAll()
                 )
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
                 )
                 .oauth2Login(login -> login
-                        //.failureHandler((httpServletRequest, httpServletResponse, authenticationException) -> {})
-                        // .successHandler()
-                        .failureUrl("http://localhost:4200/redirect")
-                        .defaultSuccessUrl("http://localhost:4200/redirect?success=true", true)
+                                //.failureHandler((httpServletRequest, httpServletResponse, authenticationException) -> {})
+                                // .successHandler()
+                                .failureUrl(frontendConfig.getRedirectErrorUri())
+                                .defaultSuccessUrl(frontendConfig.getRedirectUri(), true)
                         // .loginProcessingUrl("/oauth2/")
                 )
                 .oauth2Client(Customizer.withDefaults())
@@ -58,7 +59,6 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT))
-                        .logoutSuccessUrl("http://localhost:4200/redirect?success=false")
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 )
                 .build();

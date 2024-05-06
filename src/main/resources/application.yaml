@@ -40,7 +40,7 @@ logging:
 
 frontend:
   redirect-uri: http://localhost:4200/redirect?success=true
-  redirect-error-uri: http://localhost:4200/redirect
+  redirect-error-uri: http://localhost:4200/redirect?success=false
 
 
 # server:
