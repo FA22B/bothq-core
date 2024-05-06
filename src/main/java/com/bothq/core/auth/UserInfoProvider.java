@@ -1,9 +1,9 @@
 package com.bothq.core.auth;
 
-import com.bothq.core.service.DiscordClient;
 import com.bothq.core.dao.DiscordGuild;
 import com.bothq.core.dao.DiscordGuildMap;
 import com.bothq.core.dao.DiscordUser;
+import com.bothq.core.service.DiscordClient;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
@@ -22,11 +22,8 @@ public class UserInfoProvider {
     private boolean authenticated = false;
 
 
-
-
     private Map<String, DiscordGuild> guilds;
     private DiscordUser user;
-
 
 
     public UserInfoProvider(DiscordClient discordClient) {
@@ -79,13 +76,12 @@ public class UserInfoProvider {
     }
 
 
-    public boolean checkAuthentication(Field field){
+    public boolean checkAuthentication(Field field) {
         if (attemptedAuthentication) return authenticated;
 
-        if (field == Field.Guild){
+        if (field == Field.Guild) {
             getGuilds();
-        }
-        else if (field == Field.User) {
+        } else if (field == Field.User) {
             getUser();
         }
 

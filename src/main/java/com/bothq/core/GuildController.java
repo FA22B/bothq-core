@@ -27,9 +27,11 @@ public class GuildController {
         return userInfoProviders.getObject();
     }
 
-    @GetMapping(value = "",
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    public DiscordGuild getGuild(@PathVariable String guildId){
+    @GetMapping(
+            value = "",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public DiscordGuild getGuild(@PathVariable String guildId) {
         return getUserInfoProvider()
                 .getGuilds()
                 .get(guildId);

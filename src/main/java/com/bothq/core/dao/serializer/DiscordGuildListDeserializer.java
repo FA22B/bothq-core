@@ -15,7 +15,7 @@ public class DiscordGuildListDeserializer extends JsonDeserializer<DiscordGuildM
         JsonNode rootNode = p.getCodec().readTree(p);
         DiscordGuildMap map = new DiscordGuildMap();
 
-        for (JsonNode node: rootNode) {
+        for (JsonNode node : rootNode) {
             DiscordGuild guild = ctx.readTreeAsValue(node, DiscordGuild.class);
 
             map.put(guild.getId(), guild);

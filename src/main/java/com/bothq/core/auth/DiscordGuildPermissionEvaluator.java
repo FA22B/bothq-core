@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 /**
  * Can be used as PreAuthentication for {@link org.springframework.web.bind.annotation.RestController}s
  * <p>
+ *
  * @example {@code @PreAuthorize("@DiscordGuildPermissionEvaluator.hasPermission(#guildId, 'Administrator')")}
  */
 @Component("discordPermissionEvaluator")
@@ -26,7 +27,7 @@ public class DiscordGuildPermissionEvaluator {
     public boolean hasPermission(String guildId, Permission permission) {
         if (!getUserInfoProvider()
                 .getGuilds()
-                .containsKey(guildId)){
+                .containsKey(guildId)) {
             // throw new AccessDeniedException("User is not a member of the guild with id '" + guildId + "'");
 
             return false;
@@ -34,9 +35,9 @@ public class DiscordGuildPermissionEvaluator {
 
         return getUserInfoProvider()
                 .getGuilds()
-                    .get(guildId)
+                .get(guildId)
                 .getPermissions()
-                    .contains(permission);
+                .contains(permission);
     }
 
 

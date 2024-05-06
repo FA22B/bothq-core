@@ -7,6 +7,6 @@ import java.util.HashMap;
 
 
 @JsonDeserialize(using = DiscordGuildListDeserializer.class)
-public class DiscordGuildMap extends HashMap<String, DiscordGuild>{
+public class DiscordGuildMap extends HashMap<String, DiscordGuild> {
 
 }

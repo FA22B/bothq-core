@@ -19,13 +19,13 @@ public class DiscordGuildTrustResolver extends AuthenticationTrustResolverImpl {
     }
 
 
-    UserInfoProvider getUserInfoProvider(){
+    UserInfoProvider getUserInfoProvider() {
         return userInfoProviders.getObject();
     }
 
 
     @Override
-    public boolean isAuthenticated(Authentication authentication)  {
+    public boolean isAuthenticated(Authentication authentication) {
         if (!super.isAuthenticated(authentication))
             return false;
 
@@ -37,7 +37,7 @@ public class DiscordGuildTrustResolver extends AuthenticationTrustResolverImpl {
     @Bean(name = "GuildAuthManager")
     public static AuthorizationManager<RequestAuthorizationContext> createAuthManager(
             ObjectProvider<UserInfoProvider> userInfoProviders
-    ){
+    ) {
         AuthenticatedAuthorizationManager<RequestAuthorizationContext> manager =
                 AuthenticatedAuthorizationManager.authenticated();
 

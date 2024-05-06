@@ -37,7 +37,7 @@ public class DiscordClient {
     }
 
 
-    private String getDiscordUserId(){
+    private String getDiscordUserId() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
@@ -60,7 +60,7 @@ public class DiscordClient {
                 .bodyToMono(elementTypeRef);
     }
 
-    private <V> Mono<V> getFromCache(String endpoint){
+    private <V> Mono<V> getFromCache(String endpoint) {
         @SuppressWarnings("unchecked")
         TypeReferenceAsyncCacheTuple<V> cacheTuple = (TypeReferenceAsyncCacheTuple<V>) caches.get(endpoint);    // Because getFromCache can theoretically be called with different elementTypeRefs, this isn't safe.
                                                                                                                 // In practice, if getFromCache was called with the wrong TypeParameter something already went wrong.
@@ -80,7 +80,7 @@ public class DiscordClient {
 
 
     private <V> void createCache(@Nonnull String endpoint,
-                                 @Nonnull ParameterizedTypeReference<V> elementTypeRef){
+                                 @Nonnull ParameterizedTypeReference<V> elementTypeRef) {
         caches.put(
                 endpoint,
                 new TypeReferenceAsyncCacheTuple<>(
@@ -94,17 +94,16 @@ public class DiscordClient {
     }
 
 
-
     public <V> Mono<V> getDiscordEndpoint(@Nonnull String endpoint,
-                                          @Nonnull ParameterizedTypeReference<V> elementTypeRef){
+                                          @Nonnull ParameterizedTypeReference<V> elementTypeRef) {
 
 
-        if (!caches.containsKey(endpoint)){
+        if (!caches.containsKey(endpoint)) {
             createCache(endpoint, elementTypeRef);
         }
 
         TypeReferenceAsyncCacheTuple<?> cacheTuple = caches.get(endpoint);
-        if (!cacheTuple.typeReference.equals(elementTypeRef)){
+        if (!cacheTuple.typeReference.equals(elementTypeRef)) {
             throw new IllegalArgumentException("Cannot retrieve an object of type '" + elementTypeRef + "', expected type '" + cacheTuple.typeReference + "'");
         }
 
@@ -113,6 +112,7 @@ public class DiscordClient {
     }
 
     private record TypeReferenceAsyncCacheTuple<V>(ParameterizedTypeReference<V> typeReference,
-                                                   AsyncCache<String, V> cache) { }
+                                                   AsyncCache<String, V> cache) {
+    }
 }
 
