@@ -1,29 +1,25 @@
 package com.bothq.core.bothqcore.config;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.filter.CorsFilter;
 
-import java.io.IOException;
 import java.util.List;
 
 @Configuration
@@ -48,13 +44,7 @@ public class SecurityConfig {
                             .anyRequest().denyAll()
                 )
                 .exceptionHandling(handling -> handling
-                        .authenticationEntryPoint(new AuthenticationEntryPoint() {
-                            private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-                            @Override
-                            public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-                                response.sendError(403, "Not authenticated");
-                            }
-                        })
+                        .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
                 )
                 .oauth2Login(login -> login
                         //.failureHandler((httpServletRequest, httpServletResponse, authenticationException) -> {})
@@ -65,10 +55,12 @@ public class SecurityConfig {
                 )
                 .oauth2Client(Customizer.withDefaults())
                 .logout(httpSecurityLogoutConfigurer -> httpSecurityLogoutConfigurer
-                        .logoutUrl("/logout")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
-                        .logoutSuccessUrl("http://localhost:4200/redirect?sucess=false"))
+                        .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT))
+                        .logoutSuccessUrl("http://localhost:4200/redirect?success=false")
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                )
                 .build();
     }
 
