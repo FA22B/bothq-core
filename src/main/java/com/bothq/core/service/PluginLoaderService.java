@@ -2,8 +2,8 @@ package com.bothq.core.service;
 
 import com.bothq.core.event.PluginFileChangedEvent;
 import com.bothq.core.plugin.LoadedPlugin;
-import com.bothq.lib.annotations.DiscordEventListener;
-import com.bothq.lib.interfaces.IPlugin;
+import com.bothq.lib.annotation.DiscordEventListener;
+import com.bothq.lib.plugin.IPlugin;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

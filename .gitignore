@@ -53,4 +53,5 @@ atlassian-ide-plugin.xml
 cached-antora-playbook.yml
 jda.properties
 jda.yaml
+secrets.yaml
 plugins/

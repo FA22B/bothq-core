@@ -4,11 +4,15 @@ import com.bothq.core.dao.serializer.DiscordPermissionDeserializer;
 import com.bothq.core.dao.serializer.DiscordPermissionSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.dv8tion.jda.api.Permission;
 
 import java.util.EnumSet;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class DiscordGuild {
     private String id;
