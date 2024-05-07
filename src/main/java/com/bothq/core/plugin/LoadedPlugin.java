@@ -4,6 +4,7 @@ import com.bothq.core.plugin.config.Config;
 import com.bothq.lib.plugin.IPlugin;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 
@@ -11,9 +12,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -33,12 +32,13 @@ public class LoadedPlugin implements Closeable {
     /**
      * The config.
      */
-    private final Config config = new Config("debug", "Debug"); // TODO: Pass actual config from future SQL service
+    private Config config;
 
     /**
-     * The instances of {@link IPlugin} created.
+     * The instance of {@link IPlugin} created.
      */
-    private final List<IPlugin> pluginInstances = new ArrayList<>();
+    @Setter
+    private IPlugin pluginInstance;
 
     /**
      * The collection of registered event listeners of the plugin.
@@ -46,46 +46,47 @@ public class LoadedPlugin implements Closeable {
     private final Map<Method, Class<?>[]> eventListeners = new HashMap<>();
 
     /**
-     * Triggers the {@link IPlugin}.pluginLoad() of all plugin instances.
+     * Triggers the {@link IPlugin}.pluginLoad() of the plugin instance.
      */
     public void load() {
-        for (var plugin : pluginInstances) {
-            try {
-                // Trigger plugin load
-                plugin.pluginLoad();
-            } catch (Exception e) {
-                log.error("Error during load for plugin '{}' ({})!", plugin.getName(), fileName, e);
-            }
+        try {
+            // Trigger plugin load
+            pluginInstance.pluginLoad();
+        } catch (Exception e) {
+            log.error("Error during load for plugin '{}' ({})!", pluginInstance.getName(), fileName, e);
         }
     }
 
     /**
-     * Triggers the {@link IPlugin}.pluginUnload() of all plugin instances.
+     * Triggers the {@link IPlugin}.pluginUnload() of the plugin instance.
      */
     public void unload() {
-        for (var plugin : pluginInstances) {
-            try {
-                // Trigger plugin unload
-                plugin.pluginUnload();
-            } catch (Exception e) {
-                log.error("Error during unload for plugin '{}' ({})!", plugin.getName(), fileName, e);
-            }
+        try {
+            // Trigger plugin unload
+            pluginInstance.pluginUnload();
+        } catch (Exception e) {
+            log.error("Error during unload of plugin '{}' ({})!", pluginInstance.getName(), fileName, e);
         }
     }
 
     /**
-     * Triggers the {@link IPlugin}.initialize(jda) of all plugin instances.
+     * Triggers the {@link IPlugin}.initialize(jda) of the plugin instance.
      *
      * @param jda The JDA instance.
      */
     public void initialize(JDA jda) {
-        for (var plugin : pluginInstances) {
-            try {
-                // Trigger initialize
-                plugin.initialize(jda, config);
-            } catch (Exception e) {
-                log.error("Error during initialization of plugin '{}' ({})!", plugin.getName(), fileName, e);
-            }
+        try {
+            // Trigger initialize
+            pluginInstance.initialize(jda);
+
+            // Create the config
+            // TODO: Replace unique ID with plugin instance class type path full name (com.example.plugin.instance)
+            config = new Config("debug", pluginInstance.getName());
+
+            // Call the config creation method with the above created config instance
+            pluginInstance.createConfig(config);
+        } catch (Exception e) {
+            log.error("Error during initialization of plugin '{}' ({})!", pluginInstance.getName(), fileName, e);
         }
     }
 
@@ -95,7 +96,7 @@ public class LoadedPlugin implements Closeable {
      * @return Whether the plugin has data in the class loader.
      */
     public boolean hasData() {
-        return !pluginInstances.isEmpty() || !eventListeners.isEmpty();
+        return pluginInstance != null || !eventListeners.isEmpty();
     }
 
     @Override

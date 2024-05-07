@@ -173,6 +173,12 @@ public class PluginLoaderService {
 
                     // Check if the plugin had data to be loaded
                     if (loadedPlugin.hasData()) {
+
+                        // Validate plugin instance
+                        if (loadedPlugin.getPluginInstance() == null) {
+                            throw new RuntimeException(String.format("IPlugin class was not found for plugin '%s'!", fileName));
+                        }
+
                         // Add loaded plugin to collection
                         loadedPlugins.add(loadedPlugin);
                     } else {
@@ -242,8 +248,13 @@ public class PluginLoaderService {
                     }
                 }
 
-                // Store class instance in collection
-                plugin.getPluginInstances().add(pluginInstance);
+                // Validate that the instance was not yet set
+                if (plugin.getPluginInstance() != null) {
+                    throw new RuntimeException("IPlugin instance was already set! Only single plugin instances allowed per jar-file!");
+                }
+
+                // Apply the plugin instance
+                plugin.setPluginInstance(pluginInstance);
             } else {
                 // Check for static methods
                 for (var method : cls.getDeclaredMethods()) {
