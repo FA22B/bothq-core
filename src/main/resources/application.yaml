@@ -7,7 +7,22 @@ spring:
       - org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
       - org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration
 
-
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+    jpa:
+      show-sql: true
+      generate-ddl: false
+      hibernate:
+        ddl-auto: update
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      properties:
+        hibernate:
+          format_sql: true
+          dialect: org.hibernate.dialect.PostgreSQLDialect
 
   security:
     oauth2:
