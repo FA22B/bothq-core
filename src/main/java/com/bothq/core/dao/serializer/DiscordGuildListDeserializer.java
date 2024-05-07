@@ -1,7 +1,7 @@
-package com.bothq.core.bothqcore;
+package com.bothq.core.dao.serializer;
 
-import com.bothq.core.bothqcore.dao.DiscordGuild;
-import com.bothq.core.bothqcore.dao.DiscordGuildMap;
+import com.bothq.core.dao.DiscordGuild;
+import com.bothq.core.dao.DiscordGuildMap;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -15,7 +15,7 @@ public class DiscordGuildListDeserializer extends JsonDeserializer<DiscordGuildM
         JsonNode rootNode = p.getCodec().readTree(p);
         DiscordGuildMap map = new DiscordGuildMap();
 
-        for (JsonNode node: rootNode) {
+        for (JsonNode node : rootNode) {
             DiscordGuild guild = ctx.readTreeAsValue(node, DiscordGuild.class);
 
             map.put(guild.getId(), guild);

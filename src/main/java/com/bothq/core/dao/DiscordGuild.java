@@ -1,7 +1,9 @@
-package com.bothq.core.bothqcore.dao;
+package com.bothq.core.dao;
 
-import com.bothq.core.bothqcore.DiscordPermissionDeserializer;
+import com.bothq.core.dao.serializer.DiscordPermissionDeserializer;
+import com.bothq.core.dao.serializer.DiscordPermissionSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,7 @@ public class DiscordGuild {
     private boolean owner;
 
     @JsonDeserialize(using = DiscordPermissionDeserializer.class)
+    @JsonSerialize(using = DiscordPermissionSerializer.class)
     private EnumSet<Permission> permissions;
     private String[] features;
 }

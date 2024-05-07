@@ -1,14 +1,16 @@
 package com.bothq.core.rest;
 
-import com.bothq.core.bothqcore.dao.DiscordGuild;
+import com.bothq.core.auth.UserInfoProvider;
+import com.bothq.core.dao.DiscordGuild;
 import com.bothq.core.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Collection;
 
 @ControllerAdvice
 @RestController
@@ -17,13 +19,18 @@ import java.util.List;
 public class ServerManagementController {
 
     private final UserInfoRepository userInfoRepository;
+    private final ObjectProvider<UserInfoProvider> userInfoProviders;
+
+
+    public UserInfoProvider getUserInfoProvider() {
+        return userInfoProviders.getObject();
+    }
+
 
     @GetMapping(produces = "application/json")
-    public List<DiscordGuild> getAllServers() {
-        return List.of(
-                new DiscordGuild("1", "Server1", "icon1", true, null, null),
-                new DiscordGuild("2", "Server2", "icon2", false, null, null),
-                new DiscordGuild("3", "Server3", "icon3", true, null, null)
-        );
+    public Collection<DiscordGuild> getAllServers() {
+        return getUserInfoProvider()
+                .getGuilds()
+                .values();
     }
 }

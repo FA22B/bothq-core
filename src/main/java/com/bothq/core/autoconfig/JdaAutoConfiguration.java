@@ -46,6 +46,5 @@ public class JdaAutoConfiguration {
 
         // Build, await ready and return
         return builder.build().awaitReady();
-
     }
 }

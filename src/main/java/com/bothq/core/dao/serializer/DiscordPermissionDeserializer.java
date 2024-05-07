@@ -1,6 +1,5 @@
-package com.bothq.core.bothqcore;
+package com.bothq.core.dao.serializer;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -9,8 +8,7 @@ import net.dv8tion.jda.api.Permission;
 import java.io.IOException;
 import java.util.EnumSet;
 
-public class DiscordPermissionDeserializer extends JsonDeserializer<EnumSet<Permission>>
-{
+public class DiscordPermissionDeserializer extends JsonDeserializer<EnumSet<Permission>> {
 
     @Override
     public EnumSet<Permission> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
