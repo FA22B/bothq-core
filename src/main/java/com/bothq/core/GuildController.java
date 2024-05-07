@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+/**
+ * @deprecated Replaced by {@link com.bothq.core.rest.UserServerController#getServerInfo(String)}
+ */
 @RestController()
 //@PreAuthorize("@discordPermissionEvaluator.hasPermission(#guildId, 'Administrator')")
+@Deprecated()
 @PreAuthorize("@discordPermissionEvaluator.hasPermission(#guildId, T(net.dv8tion.jda.api.Permission).ADMINISTRATOR)")
 @RequestMapping("/api/v1/guild/{guildId}")
 public class GuildController {

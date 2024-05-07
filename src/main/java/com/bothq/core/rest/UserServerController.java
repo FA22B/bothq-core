@@ -1,6 +1,11 @@
 package com.bothq.core.rest;
 
+import com.bothq.core.auth.UserInfoProvider;
+import com.bothq.core.dao.DiscordGuild;
 import com.bothq.core.entity.UserInfo;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,9 +13,16 @@ import java.util.List;
 
 @ControllerAdvice
 @RestController
+@RequiredArgsConstructor
 @PreAuthorize("@discordPermissionEvaluator.hasPermission(#serverId, 'Administrator')")
 @RequestMapping("/api/v1/servers")
 public class UserServerController {
+    private final ObjectProvider<UserInfoProvider> userInfoProviders;
+
+
+    public UserInfoProvider getUserInfoProvider() {
+        return userInfoProviders.getObject();
+    }
 
     @GetMapping("/{serverId}/plugins")
     public List<String> getAllPlugins(@PathVariable String serverId) {
@@ -37,9 +49,11 @@ public class UserServerController {
         return "Server left successfully";
     }
 
-    @GetMapping("/{serverId}")
-    public String getServerInfo(@PathVariable String serverId) {
-        return "Server1";
+    @GetMapping(value="/{serverId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DiscordGuild getServerInfo(@PathVariable String serverId) {
+        return getUserInfoProvider()
+                .getGuilds()
+                .get(serverId);
     }
 
     @GetMapping("/{serverId}/members")
