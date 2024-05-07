@@ -1,12 +1,13 @@
 package com.bothq.core.plugin.config.component;
 
 import com.bothq.lib.plugin.config.component.IComboBox;
+import com.bothq.lib.plugin.config.component.IComboBoxServer;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComboBox<T> extends BaseComponent<T> implements IComboBox<T> {
+public class ComboBox<T> extends BaseComponent<T, IComboBoxServer<T>> implements IComboBox<T>, IComboBoxServer<T> {
     protected int selectedIndex;
 
     @Getter

@@ -1,10 +1,11 @@
 package com.bothq.core.plugin.config.component;
 
 import com.bothq.lib.plugin.config.component.ISlider;
+import com.bothq.lib.plugin.config.component.ISliderServer;
 import lombok.Getter;
 import lombok.Setter;
 
-public class Slider extends BaseComponent<Float> implements ISlider {
+public class Slider extends BaseComponent<Float, ISliderServer> implements ISlider, ISliderServer {
     @Getter
     @Setter
     protected float minValue;

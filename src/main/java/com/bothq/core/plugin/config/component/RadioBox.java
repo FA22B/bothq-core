@@ -2,8 +2,9 @@ package com.bothq.core.plugin.config.component;
 
 import com.bothq.core.plugin.config.ConfigGroup;
 import com.bothq.lib.plugin.config.component.IRadioBox;
+import com.bothq.lib.plugin.config.component.IRadioBoxServer;
 
-public class RadioBox extends BaseComponent<Boolean> implements IRadioBox {
+public class RadioBox extends BaseComponent<Boolean, IRadioBoxServer> implements IRadioBox, IRadioBoxServer {
     protected ConfigGroup parentGroup;
 
     public RadioBox(String uniqueId, String displayName, boolean defaultValue, ConfigGroup parentGroup) {
