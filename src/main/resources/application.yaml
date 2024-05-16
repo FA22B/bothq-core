@@ -1,6 +1,30 @@
 spring:
+
   config:
     import: classpath:secrets.yaml
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    generate-ddl: false
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   security:
     oauth2:
@@ -19,3 +43,30 @@ spring:
             token-uri: https://discordapp.com/api/oauth2/token
             user-info-uri: https://discordapp.com/api/users/@me
             user-name-attribute: id
+
+logging:
+  level:
+    web: trace
+    security: trace
+    com.bothq: trace
+    org.springframework.http.codec.json: info
+    org.springframework.security: trace
+
+    # org.springframework.security: trace
+
+
+frontend:
+  redirect-uri: http://localhost:4200/redirect?success=true
+  redirect-error-uri: http://localhost:4200/redirect?success=false
+
+
+# server:
+#  servlet:
+#    session:
+#      persistent: false
+#  error:
+#    whitelabel:
+#      enabled: false
+
+
+# debug: true
