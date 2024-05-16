@@ -4,7 +4,6 @@ import com.bothq.core.plugin.config.Config;
 import com.bothq.lib.plugin.IPlugin;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 
@@ -37,13 +36,34 @@ public class LoadedPlugin implements Closeable {
     /**
      * The instance of {@link IPlugin} created.
      */
-    @Setter
     private IPlugin pluginInstance;
+
+    /**
+     * The plugin ID generated from the plugin instance class type.
+     */
+    private String pluginId;
 
     /**
      * The collection of registered event listeners of the plugin.
      */
     private final Map<Method, Class<?>[]> eventListeners = new HashMap<>();
+
+    public void setPluginInstance(IPlugin pluginInstance) {
+
+        // Check if plugin instance was already set
+        if (this.pluginInstance != null) {
+            throw new RuntimeException("Plugin instance was already set!");
+        }
+
+        // Apply the plugin instance
+        this.pluginInstance = pluginInstance;
+
+        // Generate plugin ID from plugin class
+        pluginId = pluginInstance.getClass().getName();
+
+        // Create the config
+        config = new Config(pluginId, pluginInstance.getName(), pluginId);
+    }
 
     /**
      * Triggers the {@link IPlugin}.pluginLoad() of the plugin instance.
@@ -78,10 +98,6 @@ public class LoadedPlugin implements Closeable {
         try {
             // Trigger initialize
             pluginInstance.initialize(jda);
-
-            // Create the config
-            // TODO: Replace unique ID with plugin instance class type path full name (com.example.plugin.instance)
-            config = new Config("debug", pluginInstance.getName());
 
             // Call the config creation method with the above created config instance
             pluginInstance.createConfig(config);

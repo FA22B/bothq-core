@@ -1,15 +1,13 @@
 package com.bothq.core.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.util.List;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "configs")
 public class PluginConfig {
@@ -18,21 +16,19 @@ public class PluginConfig {
     private Long configId;
 
     @ManyToOne
-    @JoinColumn(name = "server_id")
+    @JoinColumn(name = "server_id", nullable = false, foreignKey = @ForeignKey(name = "FK_SERVER"))
     private Server server;
 
     @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private PluginConfig parentConfig;
+    @JoinColumn(name = "plugin_id", nullable = false, foreignKey = @ForeignKey(name = "FK_PLUGIN"))
+    private Plugin plugin;
 
-    @OneToMany(mappedBy = "parentConfig")
-    private List<PluginConfig> childrenConfigs;
-
+    @Column(name = "unique_id", nullable = false)
     private String uniqueId;
-    private String displayName;
-    private String type;
-    private String value; // JSON string or simple string based on type
-    private Boolean isEnabled;
 
-    // Constructors, getters, and setters
+    @Column(name = "value", nullable = false)
+    private String value;
+
+    @Column(name = "is_enabled", nullable = false)
+    private Boolean isEnabled;
 }

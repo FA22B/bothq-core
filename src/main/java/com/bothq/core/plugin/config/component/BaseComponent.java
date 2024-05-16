@@ -20,9 +20,16 @@ public abstract class BaseComponent<T, V extends IComponent<?>> implements IComp
     @Getter
     protected boolean enabled = true;
 
-    public BaseComponent(String uniqueId, String displayName) {
+    protected String pluginId;
+
+    @Getter
+    protected T defaultValue;
+
+    public BaseComponent(String uniqueId, String displayName, String pluginId, T defaultValue) {
         this.uniqueId = uniqueId;
         this.displayName = displayName;
+        this.pluginId = pluginId;
+        this.defaultValue = defaultValue;
     }
 
     @Override
@@ -33,11 +40,5 @@ public abstract class BaseComponent<T, V extends IComponent<?>> implements IComp
     @Override
     public void disable() {
         enabled = false;
-    }
-
-    @Override
-    public V get(long serverId) {
-        // TODO: Implement this
-        return (V) null;
     }
 }

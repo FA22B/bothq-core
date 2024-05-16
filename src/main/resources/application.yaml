@@ -1,4 +1,5 @@
 spring:
+
   config:
     import: classpath:secrets.yaml
 
@@ -12,17 +13,18 @@ spring:
     username: myuser
     password: secret
     driver-class-name: org.postgresql.Driver
-    jpa:
-      show-sql: true
-      generate-ddl: false
+
+  jpa:
+    show-sql: true
+    generate-ddl: false
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
       hibernate:
-        ddl-auto: update
-        naming:
-          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-      properties:
-        hibernate:
-          format_sql: true
-          dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   security:
     oauth2:

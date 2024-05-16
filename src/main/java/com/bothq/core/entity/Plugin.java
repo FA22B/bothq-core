@@ -17,4 +17,8 @@ public class Plugin {
 
     @Column(unique = true)
     private String pluginId;
+
+    public Plugin(String pluginId) {
+        this.pluginId = pluginId;
+    }
 }

@@ -1,5 +1,6 @@
 package com.bothq.core.plugin.config.component;
 
+import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.ISlider;
 import com.bothq.lib.plugin.config.component.ISliderServer;
 import lombok.Getter;
@@ -18,14 +19,17 @@ public class Slider extends BaseComponent<Float, ISliderServer> implements ISlid
     @Setter
     protected float step;
 
-    public Slider(String uniqueId, String displayName, float minValue, float maxValue, float step, float defaultValue) {
-        super(uniqueId, displayName);
+    public Slider(String uniqueId, String displayName, String pluginId, float minValue, float maxValue, float step, float defaultValue) {
+        super(uniqueId, displayName, pluginId, defaultValue);
 
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.step = step;
+    }
 
-        // TODO: Handle load
-        this.setValue(defaultValue);
+    @Override
+    public ISliderServer get(long serverId) {
+        setValue(PluginConfigurationService.getInstance().getConfigurationValue(serverId, pluginId, uniqueId, defaultValue));
+        return this;
     }
 }

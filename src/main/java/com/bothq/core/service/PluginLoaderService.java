@@ -66,6 +66,11 @@ public class PluginLoaderService {
     private final ApplicationEventPublisher eventPublisher;
 
     /**
+     * The plugin configuration service.
+     */
+    private final PluginConfigurationService pluginConfigurationService;
+
+    /**
      * The collection of loaded plugins in alphabetical order.
      */
     @Getter
@@ -94,6 +99,13 @@ public class PluginLoaderService {
 
             // Initialize
             plugin.initialize(jda);
+        }
+
+        // Create default config values
+        pluginConfigurationService.createDefaultValues(loadedPlugins);
+
+        // Load plugins
+        for (var plugin : loadedPlugins) {
 
             // Trigger load method
             plugin.load();
@@ -178,6 +190,22 @@ public class PluginLoaderService {
                         if (loadedPlugin.getPluginInstance() == null) {
                             throw new RuntimeException(String.format("IPlugin class was not found for plugin '%s'!", fileName));
                         }
+
+                        // Validate the plugin ID is unique
+                        for (var plugin : loadedPlugins) {
+                            if (plugin.getPluginId().equals(loadedPlugin.getPluginId())) {
+                                throw new RuntimeException(
+                                        String.format(
+                                                "Plugin %s (%s) shares the unique plugin ID with the already loaded %s (%s) plugin! IDs must be unique!",
+                                                loadedPlugin.getPluginInstance().getName(),
+                                                loadedPlugin.getFileName(),
+                                                plugin.getPluginInstance().getName(),
+                                                plugin.getFileName()));
+                            }
+                        }
+
+                        // Register the plugin in the configuration service
+                        pluginConfigurationService.registerPlugin(loadedPlugin);
 
                         // Add loaded plugin to collection
                         loadedPlugins.add(loadedPlugin);
