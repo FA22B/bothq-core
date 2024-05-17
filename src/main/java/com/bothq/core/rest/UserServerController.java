@@ -6,6 +6,7 @@ import com.bothq.core.entity.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,11 @@ public class UserServerController {
         return List.of("Plugin1", "Plugin2", "Plugin3");
     }
 
+    @GetMapping("/{serverId}/plugins/{pluginId}")
+    public ResponseEntity<String> getPluginConfiguration(@PathVariable Long serverId, @PathVariable Long pluginId) {
+        return ResponseEntity.ok("TODO");
+    }
+
     @PutMapping("/{serverId}/plugins/{pluginId}")
     public String updatePluginConfig(@PathVariable String serverId, @RequestBody String config) {
         return "Plugin configuration updated successfully";
@@ -49,7 +55,7 @@ public class UserServerController {
         return "Server left successfully";
     }
 
-    @GetMapping(value="/{serverId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{serverId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public DiscordGuild getServerInfo(@PathVariable String serverId) {
         return getUserInfoProvider()
                 .getGuilds()

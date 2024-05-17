@@ -54,14 +54,10 @@ public class PluginEventDistributionService {
 
         // Non-static method check
         if (!Modifier.isStatic(method.getModifiers())) {
-            // Search for the instance
-            for (var plugin : loadedPlugin.getPluginInstances()) {
-                // Check if instance of loaded plugin matches
-                if (method.getDeclaringClass().isInstance(plugin)) {
-                    // Apply instance
-                    instance = plugin;
-                    break;
-                }
+            // Check if instance of loaded plugin matches
+            if (method.getDeclaringClass().isInstance(loadedPlugin.getPluginInstance())) {
+                // Apply instance
+                instance = loadedPlugin.getPluginInstance();
             }
 
             if (instance == null) {

@@ -1,18 +1,17 @@
 package com.bothq.core.plugin.config.component;
 
 import com.bothq.core.plugin.config.ConfigGroup;
+import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.IRadioBox;
+import com.bothq.lib.plugin.config.component.IRadioBoxServer;
 
-public class RadioBox extends BaseComponent<Boolean> implements IRadioBox {
+public class RadioBox extends BaseComponent<Boolean, IRadioBoxServer> implements IRadioBox, IRadioBoxServer {
     protected ConfigGroup parentGroup;
 
-    public RadioBox(String uniqueId, String displayName, boolean defaultValue, ConfigGroup parentGroup) {
-        super(uniqueId, displayName);
+    public RadioBox(String uniqueId, String displayName, String pluginId, boolean defaultValue, ConfigGroup parentGroup) {
+        super(uniqueId, displayName, pluginId, defaultValue);
 
         this.parentGroup = parentGroup;
-
-        // TODO: Load value
-        this.setValue(defaultValue);
     }
 
     @Override
@@ -27,5 +26,11 @@ public class RadioBox extends BaseComponent<Boolean> implements IRadioBox {
                 }
             }
         }
+    }
+
+    @Override
+    public IRadioBoxServer get(long serverId) {
+        setValue(PluginConfigurationService.getInstance().getConfigurationValue(serverId, pluginId, uniqueId, defaultValue));
+        return this;
     }
 }
