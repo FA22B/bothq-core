@@ -4,6 +4,7 @@ import com.bothq.core.dto.GeneralConfigDTO;
 import com.bothq.core.dto.GroupConfigDTO;
 import com.bothq.core.dto.PluginConfigDTO;
 import com.bothq.core.plugin.LoadedPlugin;
+import com.bothq.core.plugin.config.Config;
 import com.bothq.core.plugin.config.ConfigGroup;
 import com.bothq.core.plugin.config.component.BaseComponent;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,22 @@ public class UserServerControllerService {
         // Get the string config ID from the numeral database ID
         var configId = pluginConfigurationService.getConfigId(pluginId);
 
+        // Get the config
+        var config = getConfig(pluginId, configId);
+
+        return new PluginConfigDTO(
+                200,
+                "Success",
+                pluginId,
+                "group",
+                config.getUniqueId(),
+                config.isEnabled(),
+                config.getDisplayName(),
+                getPluginConfigDTO(serverId, config));
+    }
+
+    private Config getConfig(long pluginId, String configId) {
+
         // Try to find the plugin
         LoadedPlugin foundPlugin = null;
         for (var plugin : pluginLoaderService.getLoadedPlugins()) {
@@ -39,18 +56,8 @@ public class UserServerControllerService {
             throw new RuntimeException(String.format("Plugin ID was not found by numeral value '%d'", pluginId));
         }
 
-        // Get the config
-        var config = foundPlugin.getConfig();
-
-        return new PluginConfigDTO(
-                200,
-                "Success",
-                pluginId,
-                "group",
-                config.getUniqueId(),
-                config.isEnabled(),
-                config.getDisplayName(),
-                getPluginConfigDTO(serverId, config));
+        // Return the config
+        return foundPlugin.getConfig();
     }
 
     private List<GeneralConfigDTO> getPluginConfigDTO(long serverId, ConfigGroup configGroup) {
