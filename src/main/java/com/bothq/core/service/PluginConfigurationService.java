@@ -143,6 +143,10 @@ public class PluginConfigurationService {
         }
     }
 
+    public String getConfigId(long pluginId) {
+        return pluginRepository.findById(pluginId).orElseThrow(() -> new RuntimeException("Plugin not found!")).getPluginId();
+    }
+
     public <T> T getConfigurationValue(long serverId, String pluginId, String configUniqueId, T defaultValue) {
         var server = serverRepository.findById(serverId).orElseThrow(() -> new RuntimeException("Server not found"));
         var plugin = pluginRepository.findByPluginId(pluginId).orElseThrow(() -> new RuntimeException("Plugin not found"));

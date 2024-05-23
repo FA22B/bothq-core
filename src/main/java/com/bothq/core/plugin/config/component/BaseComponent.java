@@ -1,5 +1,6 @@
 package com.bothq.core.plugin.config.component;
 
+import com.bothq.core.dto.GeneralConfigDTO;
 import com.bothq.lib.plugin.config.component.IComponent;
 import com.bothq.lib.plugin.config.component.IUnselectedServerComponent;
 import lombok.Getter;
@@ -41,4 +42,6 @@ public abstract class BaseComponent<T, V extends IComponent<?>> implements IComp
     public void disable() {
         enabled = false;
     }
+
+    public abstract GeneralConfigDTO getGeneralConfigDTO(long serverId);
 }

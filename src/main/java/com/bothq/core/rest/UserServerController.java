@@ -2,7 +2,9 @@ package com.bothq.core.rest;
 
 import com.bothq.core.auth.UserInfoProvider;
 import com.bothq.core.dao.DiscordGuild;
+import com.bothq.core.dto.PluginConfigDTO;
 import com.bothq.core.entity.UserInfo;
+import com.bothq.core.service.UserServerControllerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.MediaType;
@@ -20,6 +22,8 @@ import java.util.List;
 public class UserServerController {
     private final ObjectProvider<UserInfoProvider> userInfoProviders;
 
+    private final UserServerControllerService userServerControllerService;
+
 
     public UserInfoProvider getUserInfoProvider() {
         return userInfoProviders.getObject();
@@ -31,8 +35,8 @@ public class UserServerController {
     }
 
     @GetMapping("/{serverId}/plugins/{pluginId}")
-    public ResponseEntity<String> getPluginConfiguration(@PathVariable Long serverId, @PathVariable Long pluginId) {
-        return ResponseEntity.ok("TODO");
+    public ResponseEntity<PluginConfigDTO> getPluginConfiguration(@PathVariable Long serverId, @PathVariable Long pluginId) {
+        return ResponseEntity.ok(userServerControllerService.getPluginConfiguration(serverId, pluginId));
     }
 
     @PutMapping("/{serverId}/plugins/{pluginId}")
