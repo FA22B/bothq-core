@@ -47,6 +47,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("com.bothq.lib:bothq-lib")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
+
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4")
 }
 
 tasks.withType<Test> {

@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/**")
                         .access(guildAuthManager)
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
                         .anyRequest().denyAll()
                 )
                 .exceptionHandling(handling -> handling

@@ -5,6 +5,11 @@ import com.bothq.core.dao.DiscordGuild;
 import com.bothq.core.dto.PluginConfigDTO;
 import com.bothq.core.entity.UserInfo;
 import com.bothq.core.service.UserServerControllerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.MediaType;
@@ -19,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize("@discordPermissionEvaluator.hasPermission(#serverId, 'Administrator')")
 @RequestMapping("/api/v1/servers")
+@Tag(name = "User Server Operations", description = "Operations related to user authenticated actions")
 public class UserServerController {
     private final ObjectProvider<UserInfoProvider> userInfoProviders;
 
@@ -34,8 +40,16 @@ public class UserServerController {
         return List.of("Plugin1", "Plugin2", "Plugin3");
     }
 
+    @Operation(summary = "Get Plugin Configuration", description = "Fetches the configuration of a specified plugin on a specified server")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "404", description = "Plugin or Server not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/{serverId}/plugins/{pluginId}")
-    public ResponseEntity<PluginConfigDTO> getPluginConfiguration(@PathVariable Long serverId, @PathVariable Long pluginId) {
+    public ResponseEntity<PluginConfigDTO> getPluginConfiguration(
+            @Parameter(description = "ID of the server") @PathVariable Long serverId,
+            @Parameter(description = "ID of the plugin") @PathVariable Long pluginId) {
         return ResponseEntity.ok(userServerControllerService.getPluginConfiguration(serverId, pluginId));
     }
 
