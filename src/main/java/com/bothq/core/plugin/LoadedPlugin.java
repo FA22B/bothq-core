@@ -61,8 +61,15 @@ public class LoadedPlugin implements Closeable {
         // Generate plugin ID from plugin class
         pluginId = pluginInstance.getClass().getName();
 
+
+
         // Create the config
-        config = new Config(pluginId, pluginInstance.getName(), pluginId);
+        config = new Config(
+                pluginId,
+                pluginInstance.getName(),
+                pluginInstance.getDescription(),
+                pluginId
+        );
     }
 
     /**

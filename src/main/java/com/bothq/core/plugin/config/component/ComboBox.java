@@ -1,7 +1,6 @@
 package com.bothq.core.plugin.config.component;
 
-import com.bothq.core.dto.ComboBoxConfigDTO;
-import com.bothq.core.dto.GeneralConfigDTO;
+import com.bothq.core.dto.combobox.ConcreteComboBoxConfigDTO;
 import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.IComboBox;
 import com.bothq.lib.plugin.config.component.IComboBoxServer;
@@ -43,11 +42,11 @@ public class ComboBox<T> extends BaseComponent<T, IComboBoxServer<T>> implements
     }
 
     @Override
-    public GeneralConfigDTO getGeneralConfigDTO(long serverId) {
+    public ConcreteComboBoxConfigDTO getConcreteConfigDTO(long serverId) {
         // Refresh value
         get(serverId);
 
-        return new ComboBoxConfigDTO("combobox", uniqueId, enabled, displayName, value, selectedIndex, castToListObject(elements));
+        return new ConcreteComboBoxConfigDTO("combobox", uniqueId, enabled, displayName, value, selectedIndex, castToListObject(elements));
     }
 
     private static <T> List<Object> castToListObject(List<T> list) {

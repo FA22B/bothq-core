@@ -1,6 +1,6 @@
 package com.bothq.core.plugin.config.component;
 
-import com.bothq.core.dto.GeneralConfigDTO;
+import com.bothq.core.dto.base.ConcreteGeneralConfigDTO;
 import com.bothq.core.plugin.config.ConfigGroup;
 import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.IRadioBox;
@@ -36,10 +36,10 @@ public class RadioBox extends BaseComponent<Boolean, IRadioBoxServer> implements
     }
 
     @Override
-    public GeneralConfigDTO getGeneralConfigDTO(long serverId) {
+    public ConcreteGeneralConfigDTO getConcreteConfigDTO(long serverId) {
         // Refresh value
         get(serverId);
 
-        return new GeneralConfigDTO("radiobox", uniqueId, enabled, displayName, value);
+        return new ConcreteGeneralConfigDTO("radiobox", uniqueId, enabled, displayName, value);
     }
 }

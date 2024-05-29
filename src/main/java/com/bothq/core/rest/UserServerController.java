@@ -22,7 +22,7 @@ import java.util.List;
 @ControllerAdvice
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("@discordPermissionEvaluator.hasPermission(#serverId, 'Administrator')")
+@PreAuthorize("@discordPermissionEvaluator.hasPermission(#serverId, T(net.dv8tion.jda.api.Permission).ADMINISTRATOR)")
 @RequestMapping("/api/v1/servers")
 @Tag(name = "User Server Operations", description = "Operations related to user authenticated actions")
 public class UserServerController {
@@ -37,6 +37,7 @@ public class UserServerController {
 
     @GetMapping("/{serverId}/plugins")
     public List<String> getAllPlugins(@PathVariable String serverId) {
+
         return List.of("Plugin1", "Plugin2", "Plugin3");
     }
 

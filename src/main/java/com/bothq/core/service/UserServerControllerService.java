@@ -1,8 +1,8 @@
 package com.bothq.core.service;
 
-import com.bothq.core.dto.GeneralConfigDTO;
-import com.bothq.core.dto.GroupConfigDTO;
 import com.bothq.core.dto.PluginConfigDTO;
+import com.bothq.core.dto.base.IConcreteConfigDTO;
+import com.bothq.core.dto.group.ConcreteGroupConfigDTO;
 import com.bothq.core.plugin.LoadedPlugin;
 import com.bothq.core.plugin.config.Config;
 import com.bothq.core.plugin.config.ConfigGroup;
@@ -37,6 +37,7 @@ public class UserServerControllerService {
                 config.getUniqueId(),
                 config.isEnabled(),
                 config.getDisplayName(),
+                config.getDescription(),
                 getPluginConfigDTO(serverId, config));
     }
 
@@ -60,15 +61,15 @@ public class UserServerControllerService {
         return foundPlugin.getConfig();
     }
 
-    private List<GeneralConfigDTO> getPluginConfigDTO(long serverId, ConfigGroup configGroup) {
+    private List<IConcreteConfigDTO> getPluginConfigDTO(long serverId, ConfigGroup configGroup) {
 
         // Prepare the return value
-        var returnValue = new ArrayList<GeneralConfigDTO>();
+        var returnValue = new ArrayList<IConcreteConfigDTO>();
 
         for (var configEntry : configGroup.getChildren()) {
 
             if (configEntry instanceof ConfigGroup subGroup) {
-                var group = new GroupConfigDTO(
+                var group = new ConcreteGroupConfigDTO(
                         "group",
                         subGroup.getUniqueId(),
                         subGroup.isEnabled(),
@@ -76,7 +77,7 @@ public class UserServerControllerService {
                         getPluginConfigDTO(serverId, subGroup));
                 returnValue.add(group);
             } else if (configEntry instanceof BaseComponent<?, ?> baseComponent) {
-                returnValue.add(baseComponent.getGeneralConfigDTO(serverId));
+                returnValue.add(baseComponent.getConcreteConfigDTO(serverId));
             }
         }
 

@@ -1,6 +1,6 @@
 package com.bothq.core.plugin.config.component;
 
-import com.bothq.core.dto.GeneralConfigDTO;
+import com.bothq.core.dto.base.ConcreteGeneralConfigDTO;
 import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.ICheckBox;
 import com.bothq.lib.plugin.config.component.ICheckBoxServer;
@@ -17,10 +17,10 @@ public class CheckBox extends BaseComponent<Boolean, ICheckBoxServer> implements
     }
 
     @Override
-    public GeneralConfigDTO getGeneralConfigDTO(long serverId) {
+    public ConcreteGeneralConfigDTO getConcreteConfigDTO(long serverId) {
         // Refresh value
         get(serverId);
 
-        return new GeneralConfigDTO("checkbox", uniqueId, enabled, displayName, value);
+        return new ConcreteGeneralConfigDTO("checkbox", uniqueId, enabled, displayName, value);
     }
 }

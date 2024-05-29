@@ -41,7 +41,7 @@ public class DiscordGuildPermissionEvaluator {
     }
 
 
-    public boolean hasPermission(String guildId, String permissionName) throws IllegalArgumentException {
-        return hasPermission(guildId, Permission.valueOf(permissionName));
-    }
+//    public boolean hasPermission(String guildId, String permissionName) throws IllegalArgumentException {
+//        return hasPermission(guildId, Permission.valueOf(permissionName));
+//    }
 }

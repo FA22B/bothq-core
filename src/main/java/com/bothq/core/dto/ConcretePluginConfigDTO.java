@@ -1,6 +1,6 @@
 package com.bothq.core.dto;
 
-import com.bothq.core.dto.base.IConfigDTO;
+import com.bothq.core.dto.base.IConcreteConfigDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class PluginConfigDTO {
+public class ConcretePluginConfigDTO {
 
     @Getter(onMethod_ = {@JsonProperty("statusCode")})
     @Setter(onMethod_ = {@JsonProperty("statusCode")})
@@ -47,5 +47,5 @@ public class PluginConfigDTO {
 
     @Getter(onMethod_ = {@JsonProperty("value")})
     @Setter(onMethod_ = {@JsonProperty("value")})
-    private List<? extends IConfigDTO> value;
+    private List<? extends IConcreteConfigDTO> value;
 }
