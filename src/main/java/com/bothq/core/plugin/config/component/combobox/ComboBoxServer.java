@@ -7,15 +7,15 @@ import lombok.Getter;
 
 import java.util.List;
 
-public class ComboBoxServer<T> extends BaseServerComponent<T, IComboBoxServer<T>> implements IComboBoxServer<T> {
+public class ComboBoxServer extends BaseServerComponent<String, IComboBoxServer> implements IComboBoxServer {
     @Getter
-    protected final List<T> elements;
+    protected final List<String> elements;
 
     public ComboBoxServer(String uniqueId,
                           String displayName,
                           String pluginId,
-                          T value,
-                          List<T> elements) {
+                          String value,
+                          List<String> elements) {
         super(uniqueId, displayName, pluginId, value);
 
         this.elements = elements;

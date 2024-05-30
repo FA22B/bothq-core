@@ -10,26 +10,24 @@ import lombok.Setter;
 
 import java.util.List;
 
-public class ComboBox<T> extends BaseComponent<T, IComboBoxServer<T>> implements IComboBox<T> {
-    protected int selectedIndex;
-
+public class ComboBox extends BaseComponent<String, IComboBoxServer> implements IComboBox {
     @Getter
     @Setter
-    protected List<T> elements;
+    protected List<String> elements;
 
     public ComboBox(String uniqueId,
                     String displayName,
                     String pluginId,
-                    T defaultValue,
-                    List<T> elements) {
+                    String defaultValue,
+                    List<String> elements) {
         super(uniqueId, displayName, pluginId, defaultValue);
 
         // TODO: Handle load
         this.elements = elements;
     }
     @Override
-    public ComboBoxServer<T> get(long serverId) {
-        return new ComboBoxServer<T>(
+    public ComboBoxServer get(long serverId) {
+        return new ComboBoxServer(
                 getUniqueId(),
                 getDisplayName(),
                 pluginId,

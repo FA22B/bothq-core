@@ -54,11 +54,11 @@ public class ConfigGroup implements IConfigGroup {
     }
 
     @Override
-    public <T> IComboBox<T> addComboBox(String uniqueId, String displayName, List<T> elements, T defaultValue) {
+    public IComboBox addComboBox(String uniqueId, String displayName, List<String> elements, String defaultValue) {
         var newUniqueId = createUniqueId(uniqueId);
         Assert.isTrue(isUniqueIdUnique(newUniqueId), "Unique ID was already set!");
 
-        var comboBox = new ComboBox<>(newUniqueId, displayName, pluginId, defaultValue, elements);
+        var comboBox = new ComboBox(newUniqueId, displayName, pluginId, defaultValue, elements);
         children.add(comboBox);
         return comboBox;
     }
