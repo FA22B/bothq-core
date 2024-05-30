@@ -1,9 +1,9 @@
 package com.bothq.core.service;
 
-import com.bothq.core.dto.ConcretePluginConfigDTO;
-import com.bothq.core.dto.PluginConfigDTO;
-import com.bothq.core.dto.base.IConcreteConfigDTO;
-import com.bothq.core.dto.group.ConcreteGroupConfigDTO;
+import com.bothq.core.dto.get.ConcretePluginConfigGetDTO;
+import com.bothq.core.dto.get.PluginConfigGetDTO;
+import com.bothq.core.dto.get.base.IConcreteConfigGetDTO;
+import com.bothq.core.dto.get.group.ConcreteGroupConfigGetDTO;
 import com.bothq.core.plugin.LoadedPlugin;
 import com.bothq.core.plugin.config.Config;
 import com.bothq.core.plugin.config.ConfigGroup;
@@ -24,11 +24,11 @@ public class PluginConfigDTOService {
     private final PluginConfigurationService pluginConfigurationService;
     private final PluginLoaderService pluginLoaderService;
 
-    public ConcretePluginConfigDTO getConcretePluginConfiguration(long serverId, long pluginId) {
+    public ConcretePluginConfigGetDTO getConcretePluginConfiguration(long serverId, long pluginId) {
         // Get the config
         var config = getConfig(pluginId);
 
-        return new ConcretePluginConfigDTO(
+        return new ConcretePluginConfigGetDTO(
                 200,
                 "Success",
                 pluginId,
@@ -40,11 +40,11 @@ public class PluginConfigDTOService {
                 getPluginConfigDTO(serverId, config));
     }
 
-    public PluginConfigDTO getPlugin(long pluginId) {
+    public PluginConfigGetDTO getPlugin(long pluginId) {
         // Get the config
         var config = getConfig(pluginId);
 
-        return new PluginConfigDTO(
+        return new PluginConfigGetDTO(
                 200,
                 "Success",
                 pluginId,
@@ -55,7 +55,7 @@ public class PluginConfigDTOService {
     }
 
 
-    public List<PluginConfigDTO> getAllPlugins(){
+    public List<PluginConfigGetDTO> getAllPlugins(){
         Map<String, Long> pluginNameToIdMapping = pluginConfigurationService.getPluginNameToIdMapping();
 
 
@@ -63,7 +63,7 @@ public class PluginConfigDTOService {
                 .getLoadedPlugins()
                 .stream()
                 .map(LoadedPlugin::getConfig)
-                .map(config -> new PluginConfigDTO(
+                .map(config -> new PluginConfigGetDTO(
                         200,
                         "Success",
                         pluginNameToIdMapping.get(config.getPluginId()),
@@ -99,15 +99,15 @@ public class PluginConfigDTOService {
         return foundPlugin.getConfig();
     }
 
-    private List<IConcreteConfigDTO> getPluginConfigDTO(long serverId, ConfigGroup configGroup) {
+    private List<IConcreteConfigGetDTO> getPluginConfigDTO(long serverId, ConfigGroup configGroup) {
 
         // Prepare the return value
-        var returnValue = new ArrayList<IConcreteConfigDTO>();
+        var returnValue = new ArrayList<IConcreteConfigGetDTO>();
 
         for (var configEntry : configGroup.getChildren()) {
 
             if (configEntry instanceof ConfigGroup subGroup) {
-                var group = new ConcreteGroupConfigDTO(
+                var group = new ConcreteGroupConfigGetDTO(
                         "group",
                         subGroup.getUniqueId(),
                         subGroup.getDisplayName(),

@@ -1,6 +1,6 @@
-package com.bothq.core.dto.base;
+package com.bothq.core.dto.get.base;
 
-public interface IConfigDTO {
+public interface IConfigGetDTO {
     String getType();
 
     String getUniqueID();

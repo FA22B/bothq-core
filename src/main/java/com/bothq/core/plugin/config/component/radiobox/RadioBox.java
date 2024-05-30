@@ -1,6 +1,6 @@
 package com.bothq.core.plugin.config.component.radiobox;
 
-import com.bothq.core.dto.base.IConcreteConfigDTO;
+import com.bothq.core.dto.get.base.IConcreteConfigGetDTO;
 import com.bothq.core.plugin.config.component.base.BaseComponent;
 import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.IRadioBox;
@@ -10,7 +10,7 @@ import java.util.List;
 
 public class RadioBox extends BaseComponent<String, IRadioBoxServer> implements IRadioBox {
 
-    private List<String> elements;
+    private final List<String> elements;
 
     public RadioBox(String uniqueId,
                     String displayName,
@@ -37,7 +37,7 @@ public class RadioBox extends BaseComponent<String, IRadioBoxServer> implements 
     }
 
     @Override
-    public IConcreteConfigDTO getConcreteConfigDTO(long serverId) {
+    public IConcreteConfigGetDTO getConcreteConfigDTO(long serverId) {
         return get(serverId).getConcreteConfigDTO();
     }
 }

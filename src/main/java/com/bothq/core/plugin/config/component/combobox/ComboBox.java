@@ -1,6 +1,6 @@
 package com.bothq.core.plugin.config.component.combobox;
 
-import com.bothq.core.dto.base.IConcreteConfigDTO;
+import com.bothq.core.dto.get.base.IConcreteConfigGetDTO;
 import com.bothq.core.plugin.config.component.base.BaseComponent;
 import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.IComboBox;
@@ -41,7 +41,7 @@ public class ComboBox<T> extends BaseComponent<T, IComboBoxServer<T>> implements
     }
 
     @Override
-    public IConcreteConfigDTO getConcreteConfigDTO(long serverId) {
+    public IConcreteConfigGetDTO getConcreteConfigDTO(long serverId) {
         return get(serverId).getConcreteConfigDTO();
     }
 }

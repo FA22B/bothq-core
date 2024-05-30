@@ -1,6 +1,6 @@
 package com.bothq.core.plugin.config.component.slider;
 
-import com.bothq.core.dto.slider.ConcreteSliderConfigDTO;
+import com.bothq.core.dto.get.slider.ConcreteSliderConfigGetDTO;
 import com.bothq.core.plugin.config.component.base.BaseComponent;
 import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.ISlider;
@@ -45,7 +45,7 @@ public class Slider extends BaseComponent<Float, ISliderServer> implements ISlid
     }
 
     @Override
-    public ConcreteSliderConfigDTO getConcreteConfigDTO(long serverId) {
+    public ConcreteSliderConfigGetDTO getConcreteConfigDTO(long serverId) {
         return get(serverId)
                 .getConcreteConfigDTO();
     }

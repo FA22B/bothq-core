@@ -2,7 +2,7 @@ package com.bothq.core.rest;
 
 import com.bothq.core.auth.UserInfoProvider;
 import com.bothq.core.dao.DiscordGuild;
-import com.bothq.core.dto.ConcretePluginConfigDTO;
+import com.bothq.core.dto.get.ConcretePluginConfigGetDTO;
 import com.bothq.core.entity.UserInfo;
 import com.bothq.core.service.PluginConfigDTOService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,7 +48,7 @@ public class UserServerController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{serverId}/plugins/{pluginId}")
-    public ResponseEntity<ConcretePluginConfigDTO> getPluginConfiguration(
+    public ResponseEntity<ConcretePluginConfigGetDTO> getPluginConfiguration(
             @Parameter(description = "ID of the server") @PathVariable Long serverId,
             @Parameter(description = "ID of the plugin") @PathVariable Long pluginId) {
         return ResponseEntity.ok(pluginConfigService.getConcretePluginConfiguration(serverId, pluginId));

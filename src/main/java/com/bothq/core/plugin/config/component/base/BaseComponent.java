@@ -1,6 +1,6 @@
 package com.bothq.core.plugin.config.component.base;
 
-import com.bothq.core.dto.base.IConcreteConfigDTO;
+import com.bothq.core.dto.get.base.IConcreteConfigGetDTO;
 import com.bothq.lib.plugin.config.IConfigurable;
 import com.bothq.lib.plugin.config.component.IComponent;
 import com.bothq.lib.plugin.config.component.IUnselectedServerComponent;
@@ -27,5 +27,5 @@ public abstract class BaseComponent<T, V extends IComponent<T>> implements IUnse
         this.defaultValue = defaultValue;
     }
 
-    public abstract IConcreteConfigDTO getConcreteConfigDTO(long serverId);
+    public abstract IConcreteConfigGetDTO getConcreteConfigDTO(long serverId);
 }

@@ -1,6 +1,6 @@
 package com.bothq.core.plugin.config.component.textbox;
 
-import com.bothq.core.dto.base.ConcreteGeneralConfigDTO;
+import com.bothq.core.dto.get.base.ConcreteGeneralConfigGetDTO;
 import com.bothq.core.plugin.config.component.base.BaseComponent;
 import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.ITextBox;
@@ -24,7 +24,7 @@ public class TextBox extends BaseComponent<String, ITextBoxServer> implements IT
     }
 
     @Override
-    public ConcreteGeneralConfigDTO getConcreteConfigDTO(long serverId) {
+    public ConcreteGeneralConfigGetDTO getConcreteConfigDTO(long serverId) {
         return get(serverId).getConcreteConfigDTO();
     }
 }

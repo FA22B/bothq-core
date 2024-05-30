@@ -1,6 +1,6 @@
 package com.bothq.core.rest;
 
-import com.bothq.core.dto.PluginConfigDTO;
+import com.bothq.core.dto.get.PluginConfigGetDTO;
 import com.bothq.core.repository.PluginRepository;
 import com.bothq.core.service.PluginConfigDTOService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,7 +31,7 @@ public class PluginController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{pluginId}")
-    public ResponseEntity<PluginConfigDTO> getPlugin(
+    public ResponseEntity<PluginConfigGetDTO> getPlugin(
             @Parameter(description = "ID of the plugin") @PathVariable Long pluginId) {
         return ResponseEntity.ok(pluginConfigService.getPlugin(pluginId));
     }
@@ -44,7 +44,7 @@ public class PluginController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("")
-    public ResponseEntity<List<PluginConfigDTO>> getAllPlugins() {
+    public ResponseEntity<List<PluginConfigGetDTO>> getAllPlugins() {
         return ResponseEntity.ok(pluginConfigService.getAllPlugins());
     }
 

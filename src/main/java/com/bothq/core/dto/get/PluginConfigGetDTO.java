@@ -1,17 +1,14 @@
-package com.bothq.core.dto;
+package com.bothq.core.dto.get;
 
-import com.bothq.core.dto.base.IConcreteConfigDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
-public class ConcretePluginConfigDTO {
+public class PluginConfigGetDTO {
 
     @Getter(onMethod_ = {@JsonProperty("statusCode")})
     @Setter(onMethod_ = {@JsonProperty("statusCode")})
@@ -33,9 +30,6 @@ public class ConcretePluginConfigDTO {
     @Setter(onMethod_ = {@JsonProperty("uniqueId")})
     private String uniqueID;
 
-    @Getter(onMethod_ = {@JsonProperty("enabled")})
-    @Setter(onMethod_ = {@JsonProperty("enabled")})
-    private boolean enabled;
 
     @Getter(onMethod_ = {@JsonProperty("displayName")})
     @Setter(onMethod_ = {@JsonProperty("displayName")})
@@ -44,8 +38,4 @@ public class ConcretePluginConfigDTO {
     @Getter(onMethod_ = {@JsonProperty("description")})
     @Setter(onMethod_ = {@JsonProperty("description")})
     private String description;
-
-    @Getter(onMethod_ = {@JsonProperty("value")})
-    @Setter(onMethod_ = {@JsonProperty("value")})
-    private List<IConcreteConfigDTO> value;
 }

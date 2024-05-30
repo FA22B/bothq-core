@@ -1,4 +1,4 @@
-package com.bothq.core.dto.base;
+package com.bothq.core.dto.get.base;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -6,7 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class GeneralConfigDTO implements IConfigDTO {
+public class GeneralConfigGetDTO implements IConfigGetDTO {
     @Getter(onMethod_ = {@JsonProperty("type")})
     @Setter(onMethod_ = {@JsonProperty("type")})
     private String type;

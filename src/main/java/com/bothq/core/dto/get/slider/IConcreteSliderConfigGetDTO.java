@@ -1,9 +1,9 @@
-package com.bothq.core.dto.slider;
+package com.bothq.core.dto.get.slider;
 
-import com.bothq.core.dto.base.IConcreteConfigDTO;
+import com.bothq.core.dto.get.base.IConcreteConfigGetDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public interface IConcreteSliderConfigDTO extends IConcreteConfigDTO {
+public interface IConcreteSliderConfigGetDTO extends IConcreteConfigGetDTO {
     @JsonProperty("minValue")
     float getMinValue();
 

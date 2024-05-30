@@ -1,6 +1,6 @@
-package com.bothq.core.dto.combobox;
+package com.bothq.core.dto.get.combobox;
 
-import com.bothq.core.dto.base.ConcreteGeneralConfigDTO;
+import com.bothq.core.dto.get.base.ConcreteGeneralConfigGetDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,12 +11,12 @@ import java.util.List;
 
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class ConcreteComboBoxConfigDTO extends ConcreteGeneralConfigDTO implements IConcreteComboBoxConfigDTO {
+public class ConcreteComboBoxConfigGetDTO extends ConcreteGeneralConfigGetDTO implements IConcreteComboBoxConfigGetDTO {
     @Getter(onMethod_ = {@JsonProperty("elements")})
     @Setter(onMethod_ = {@JsonProperty("elements")})
     private List<? extends Object> elements;
 
-    public ConcreteComboBoxConfigDTO(String type, String uniqueID, String displayName, Object value, List<? extends Object> elements) {
+    public ConcreteComboBoxConfigGetDTO(String type, String uniqueID, String displayName, Object value, List<? extends Object> elements) {
         super(type, uniqueID, displayName, value);
 
         this.elements = elements;

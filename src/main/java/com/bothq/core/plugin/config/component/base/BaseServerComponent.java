@@ -1,6 +1,6 @@
 package com.bothq.core.plugin.config.component.base;
 
-import com.bothq.core.dto.base.IConcreteConfigDTO;
+import com.bothq.core.dto.get.base.IConcreteConfigGetDTO;
 import com.bothq.lib.plugin.config.component.IComponent;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,5 +27,5 @@ public abstract class BaseServerComponent<T, V extends IComponent<T>> implements
         this.value = value;
     }
 
-    public abstract IConcreteConfigDTO getConcreteConfigDTO();
+    public abstract IConcreteConfigGetDTO getConcreteConfigDTO();
 }

@@ -1,6 +1,6 @@
-package com.bothq.core.dto.slider;
+package com.bothq.core.dto.get.slider;
 
-import com.bothq.core.dto.base.ConcreteGeneralConfigDTO;
+import com.bothq.core.dto.get.base.ConcreteGeneralConfigGetDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class ConcreteSliderConfigDTO extends ConcreteGeneralConfigDTO implements IConcreteSliderConfigDTO {
+public class ConcreteSliderConfigGetDTO extends ConcreteGeneralConfigGetDTO implements IConcreteSliderConfigGetDTO {
 
     @Getter(onMethod_ = {@JsonProperty("minValue")})
     @Setter(onMethod_ = {@JsonProperty("minValue")})
@@ -23,8 +23,8 @@ public class ConcreteSliderConfigDTO extends ConcreteGeneralConfigDTO implements
     @Setter(onMethod_ = {@JsonProperty("step")})
     private float step;
 
-    public ConcreteSliderConfigDTO(String type, String uniqueID, String displayName, Object value, float minValue, float maxValue,
-                                   float step) {
+    public ConcreteSliderConfigGetDTO(String type, String uniqueID, String displayName, Object value, float minValue, float maxValue,
+                                      float step) {
         super(type, uniqueID, displayName, value);
 
         this.minValue = minValue;

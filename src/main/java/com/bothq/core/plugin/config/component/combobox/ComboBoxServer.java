@@ -1,6 +1,6 @@
 package com.bothq.core.plugin.config.component.combobox;
 
-import com.bothq.core.dto.combobox.ConcreteComboBoxConfigDTO;
+import com.bothq.core.dto.get.combobox.ConcreteComboBoxConfigGetDTO;
 import com.bothq.core.plugin.config.component.base.BaseServerComponent;
 import com.bothq.lib.plugin.config.component.IComboBoxServer;
 import lombok.Getter;
@@ -22,8 +22,8 @@ public class ComboBoxServer<T> extends BaseServerComponent<T, IComboBoxServer<T>
     }
 
 
-    public ConcreteComboBoxConfigDTO getConcreteConfigDTO() {
-        return new ConcreteComboBoxConfigDTO(
+    public ConcreteComboBoxConfigGetDTO getConcreteConfigDTO() {
+        return new ConcreteComboBoxConfigGetDTO(
                 "combobox",
                 uniqueId,
                 displayName,
