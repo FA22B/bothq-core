@@ -4,7 +4,7 @@ import com.bothq.core.auth.UserInfoProvider;
 import com.bothq.core.dao.DiscordGuild;
 import com.bothq.core.dto.ConcretePluginConfigDTO;
 import com.bothq.core.entity.UserInfo;
-import com.bothq.core.service.PluginConfigService;
+import com.bothq.core.service.PluginConfigDTOService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,7 +28,7 @@ import java.util.List;
 public class UserServerController {
     private final ObjectProvider<UserInfoProvider> userInfoProviders;
 
-    private final PluginConfigService pluginConfigService;
+    private final PluginConfigDTOService pluginConfigService;
 
 
     public UserInfoProvider getUserInfoProvider() {

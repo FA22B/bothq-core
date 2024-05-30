@@ -2,7 +2,7 @@ package com.bothq.core.rest;
 
 import com.bothq.core.dto.PluginConfigDTO;
 import com.bothq.core.repository.PluginRepository;
-import com.bothq.core.service.PluginConfigService;
+import com.bothq.core.service.PluginConfigDTOService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,7 +21,7 @@ import java.util.List;
 @Tag(name = "Plugins", description = "Operations related to getting plugin information")
 public class PluginController {
     final PluginRepository pluginRepository;
-    final PluginConfigService pluginConfigService;
+    final PluginConfigDTOService pluginConfigService;
 
 
     @Operation(summary = "Get Plugin", description = "Fetches a plugins")

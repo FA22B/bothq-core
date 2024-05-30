@@ -23,9 +23,9 @@ public class SliderConfigDTO extends GeneralConfigDTO implements ISliderConfigDT
     @Setter(onMethod_ = {@JsonProperty("step")})
     private float step;
 
-    public SliderConfigDTO(String type, String uniqueID, boolean enabled, String displayName, float minValue, float maxValue,
+    public SliderConfigDTO(String type, String uniqueID, String displayName, float minValue, float maxValue,
                            float step) {
-        super(type, uniqueID, enabled, displayName);
+        super(type, uniqueID, displayName);
 
         this.minValue = minValue;
         this.maxValue = maxValue;

@@ -10,8 +10,8 @@ public class ConcreteGeneralConfigDTO extends GeneralConfigDTO implements IConcr
     @Setter(onMethod_ = {@JsonProperty("value")})
     private Object value;
 
-    public ConcreteGeneralConfigDTO(String type, String uniqueID, boolean enabled, String displayName, Object value) {
-        super(type, uniqueID, enabled, displayName);
+    public ConcreteGeneralConfigDTO(String type, String uniqueID, String displayName, Object value) {
+        super(type, uniqueID, displayName);
         this.value = value;
     }
 }

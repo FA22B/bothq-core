@@ -5,15 +5,11 @@ public interface IConfigDTO {
 
     String getUniqueID();
 
-    boolean isEnabled();
-
     String getDisplayName();
 
     void setType(String type);
 
     void setUniqueID(String uniqueID);
-
-    void setEnabled(boolean enabled);
 
     void setDisplayName(String displayName);
 }

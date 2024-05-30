@@ -7,7 +7,7 @@ import com.bothq.core.dto.group.ConcreteGroupConfigDTO;
 import com.bothq.core.plugin.LoadedPlugin;
 import com.bothq.core.plugin.config.Config;
 import com.bothq.core.plugin.config.ConfigGroup;
-import com.bothq.core.plugin.config.component.BaseComponent;
+import com.bothq.core.plugin.config.component.base.BaseComponent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PluginConfigService {
+public class PluginConfigDTOService {
 
     private final PluginConfigurationService pluginConfigurationService;
     private final PluginLoaderService pluginLoaderService;
@@ -34,7 +34,7 @@ public class PluginConfigService {
                 pluginId,
                 "group",
                 config.getUniqueId(),
-                config.isEnabled(),
+                config.isEnabled(serverId),
                 config.getDisplayName(),
                 config.getDescription(),
                 getPluginConfigDTO(serverId, config));
@@ -48,6 +48,7 @@ public class PluginConfigService {
                 200,
                 "Success",
                 pluginId,
+                "group",
                 config.getUniqueId(),
                 config.getDisplayName(),
                 config.getDescription());
@@ -66,6 +67,7 @@ public class PluginConfigService {
                         200,
                         "Success",
                         pluginNameToIdMapping.get(config.getPluginId()),
+                        "group",
                         config.getUniqueId(),
                         config.getDisplayName(),
                         config.getDescription()
@@ -108,7 +110,6 @@ public class PluginConfigService {
                 var group = new ConcreteGroupConfigDTO(
                         "group",
                         subGroup.getUniqueId(),
-                        subGroup.isEnabled(),
                         subGroup.getDisplayName(),
                         getPluginConfigDTO(serverId, subGroup));
                 returnValue.add(group);
@@ -118,5 +119,10 @@ public class PluginConfigService {
         }
 
         return returnValue;
+    }
+
+
+    public void enableServerPlugin(long serverId, long pluginId, boolean enabled){
+        pluginConfigurationService.enablePlugin(serverId, pluginId, enabled);
     }
 }

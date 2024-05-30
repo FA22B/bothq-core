@@ -1,15 +1,14 @@
 package com.bothq.core.service;
 
-import com.bothq.core.entity.Plugin;
-import com.bothq.core.entity.PluginConfig;
-import com.bothq.core.entity.Server;
+import com.bothq.core.entity.*;
 import com.bothq.core.exceptions.PluginNotFoundException;
 import com.bothq.core.exceptions.ServerNotFoundException;
 import com.bothq.core.plugin.LoadedPlugin;
 import com.bothq.core.plugin.config.ConfigGroup;
-import com.bothq.core.plugin.config.component.BaseComponent;
+import com.bothq.core.plugin.config.component.base.BaseComponent;
 import com.bothq.core.repository.ConfigRepository;
 import com.bothq.core.repository.PluginRepository;
+import com.bothq.core.repository.ServerPluginRepository;
 import com.bothq.core.repository.ServerRepository;
 import com.bothq.lib.plugin.config.IConfigurable;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +26,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +37,7 @@ public class PluginConfigurationService {
     private final ConfigRepository configRepository;
     private final ServerRepository serverRepository;
     private final PluginRepository pluginRepository;
+    private final ServerPluginRepository serverPluginRepository;
 
     private final JDA jda;
 
@@ -52,7 +53,7 @@ public class PluginConfigurationService {
 
         // Initialize existing servers
         for (var server : jda.getGuilds()) {
-            onServerJoin(new GuildJoinEvent(jda, 1337, server));
+            onServerJoin(new GuildJoinEvent(jda, 0, server));
         }
     }
 
@@ -111,7 +112,7 @@ public class PluginConfigurationService {
 
                     for (var toCheck : itemsToCheck) {
 
-                        var existingConfig = configRepository.findPluginConfigByServerIdAndUniqueId(guild.getIdLong(), toCheck.getUniqueId());
+                        var existingConfig = configRepository.findPluginConfigByServerPlugin_ServerIdAndUniqueId(guild.getIdLong(), toCheck.getUniqueId());
                         if (existingConfig.isEmpty()) {
 
                             Object defaultValue = null;
@@ -137,11 +138,13 @@ public class PluginConfigurationService {
                             // Create new config entry
                             var newConfig =
                                     PluginConfig.builder()
-                                            .server(server)
-                                            .plugin(plugin)
+                                            // .server(server)
+                                            // .plugin(plugin)
                                             .uniqueId(toCheck.getUniqueId())
                                             .value(defaultValueString)
-                                            .isEnabled(true).build();
+                                            //.isEnabled(true)
+                                            .build();
+
                             configRepository.save(newConfig);
                         }
                     }
@@ -171,7 +174,7 @@ public class PluginConfigurationService {
         var server = serverRepository.findById(serverId).orElseThrow(ServerNotFoundException::new);
         var plugin = pluginRepository.findByPluginId(pluginId).orElseThrow(PluginNotFoundException::new);
 
-        var config = configRepository.findPluginConfigByServerIdAndPluginIdAndUniqueId(server.getId(), plugin.getId(), configUniqueId);
+        var config = configRepository.findPluginConfigByServerPlugin_ServerIdAndServerPlugin_PluginIdAndUniqueId(server.getId(), plugin.getId(), configUniqueId);
 
         if (config.isEmpty()) {
             return defaultValue;
@@ -211,5 +214,62 @@ public class PluginConfigurationService {
         if (clazz == short.class || clazz == Short.class) return (T) Short.valueOf(value);
         if (clazz == String.class) return (T) value;
         throw new IllegalArgumentException("Unsupported primitive type: " + clazz);
+    }
+
+
+    public boolean enablePlugin(long serverId, long pluginId, boolean enabled){
+        ServerPluginId serverPluginId = new ServerPluginId(serverId, pluginId);
+        Optional<ServerPlugin> serverPluginOpt = serverPluginRepository.findById(serverPluginId);
+
+        if (serverPluginOpt.isPresent()) {
+            ServerPlugin serverPlugin = serverPluginOpt.get();
+            serverPlugin.setIsEnabled(enabled);
+            serverPluginRepository.save(serverPlugin);
+        }
+        else {
+            // Check if the server and plugin exist
+            Optional<Server> serverOpt = serverRepository.findById(serverId);
+            Optional<Plugin> pluginOpt = pluginRepository.findById(pluginId);
+
+
+            if (pluginOpt.isEmpty()){
+                throw new PluginNotFoundException();
+            }
+
+            Server server;
+            if (serverOpt.isEmpty()){
+                server = serverRepository.save(new Server(serverId));
+            }
+            else {
+                server = serverOpt.get();
+            }
+
+            ServerPlugin serverPlugin = ServerPlugin.builder()
+                    .server(server)
+                    .plugin(pluginOpt.get())
+                    .isEnabled(enabled)
+                    .build();
+
+
+            serverPluginRepository.save(serverPlugin);
+        }
+
+        return enabled;
+    }
+
+    public boolean getEnabled(String pluginId,
+                              long serverId,
+                              boolean defaultValue) {
+
+        var server = serverRepository.findById(serverId).orElseThrow(ServerNotFoundException::new);
+        var plugin = pluginRepository.findByPluginId(pluginId).orElseThrow(PluginNotFoundException::new);
+
+        ServerPluginId serverPluginId = new ServerPluginId(server.getId(), plugin.getId());
+        Optional<ServerPlugin> serverPluginOpt = serverPluginRepository.findById(serverPluginId);
+
+        if (serverPluginOpt.isEmpty())
+            return defaultValue;
+
+        return serverPluginOpt.get().getIsEnabled();
     }
 }

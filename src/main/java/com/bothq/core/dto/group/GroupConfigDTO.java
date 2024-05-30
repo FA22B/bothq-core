@@ -11,7 +11,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class GroupConfigDTO extends ConcreteGeneralConfigDTO {
 
-    public GroupConfigDTO(String type, String uniqueID, boolean enabled, String displayName, List<IConfigDTO> value) {
-        super(type, uniqueID, enabled, displayName, value);
+    public GroupConfigDTO(String type, String uniqueID, String displayName, List<IConfigDTO> value) {
+        super(type, uniqueID, displayName, value);
     }
 }
