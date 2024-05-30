@@ -3,7 +3,7 @@ package com.bothq.core.rest;
 import com.bothq.core.auth.UserInfoProvider;
 import com.bothq.core.dao.DiscordGuild;
 import com.bothq.core.dto.get.ConcretePluginConfigGetDTO;
-import com.bothq.core.entity.UserInfo;
+import com.bothq.core.dto.put.PluginConfigPutDTO;
 import com.bothq.core.service.PluginConfigDTOService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.List;
 @PreAuthorize("@discordPermissionEvaluator.hasPermission(#serverId, T(net.dv8tion.jda.api.Permission).ADMINISTRATOR)")
 @RequestMapping("/api/v1/servers")
 @Tag(name = "User Server Operations", description = "Operations related to user authenticated actions")
+@Slf4j
 public class UserServerController {
     private final ObjectProvider<UserInfoProvider> userInfoProviders;
 
@@ -54,24 +56,23 @@ public class UserServerController {
         return ResponseEntity.ok(pluginConfigService.getConcretePluginConfiguration(serverId, pluginId));
     }
 
+
     @PutMapping("/{serverId}/plugins/{pluginId}")
-    public String updatePluginConfig(@PathVariable String serverId, @RequestBody String config) {
-        return "Plugin configuration updated successfully";
+    public ResponseEntity<ConcretePluginConfigGetDTO> updatePluginConfig(@PathVariable Long serverId,
+                                                                         @PathVariable Long pluginId,
+                                                                         @RequestBody PluginConfigPutDTO configPutDTO) {
+        pluginConfigService.updateConfig(serverId, pluginId, configPutDTO);
+        return getPluginConfiguration(serverId, pluginId);
     }
-
-    @PostMapping("/{serverId}/plugins/{pluginId}")
-    public String statusPlugin(@PathVariable String serverId, @PathVariable String pluginId, @RequestBody boolean enabled) {
-        return "Plugin status updated successfully";
-    }
-
     @DeleteMapping("/{serverId}/plugins/{pluginId}")
-    public String deletePluginSettings(@PathVariable String serverId, @PathVariable String pluginId) {
-        return "Plugin settings deleted successfully";
+    public ResponseEntity<?> deletePluginSettings(@PathVariable long serverId, @PathVariable long pluginId) {
+        pluginConfigService.deleteServerPlugin(serverId, pluginId);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{serverId}")
-    public String leaveServer(@PathVariable String serverId) {
-        return "Server left successfully";
+    public ResponseEntity<?> leaveServer(@PathVariable String serverId) {
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(value = "/{serverId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,12 +82,4 @@ public class UserServerController {
                 .get(serverId);
     }
 
-    @GetMapping("/{serverId}/members")
-    public List<UserInfo> getMemberList(@PathVariable String serverId) {
-        return List.of(
-                new UserInfo(1, "Member1", "max@payne.de"),
-                new UserInfo(2, "Member2", "muh@kuh.de"),
-                new UserInfo(3, "Member3", "Emil@email.de")
-        );
-    }
 }

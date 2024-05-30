@@ -10,7 +10,9 @@ import com.bothq.core.repository.ConfigRepository;
 import com.bothq.core.repository.PluginRepository;
 import com.bothq.core.repository.ServerPluginRepository;
 import com.bothq.core.repository.ServerRepository;
+import com.bothq.lib.plugin.config.IConfig;
 import com.bothq.lib.plugin.config.IConfigurable;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -96,61 +98,81 @@ public class PluginConfigurationService {
                 // Get the plugin
                 var plugin = pluginRepository.findByPluginId(loadedPlugin.getPluginId()).orElseThrow(() -> new RuntimeException("Plugin not found"));
 
-                for (var config : loadedPlugin.getConfig().getChildren()) {
+                createDefaultValues(guild.getIdLong(), plugin.getId(), loadedPlugin.getConfig());
+            }
+        }
+    }
 
-                    var itemsToCheck = new ArrayList<IConfigurable>();
-                    itemsToCheck.add(config);
+    private void createDefaultValues(long serverId, long pluginId, IConfig iConfig) {
+        ServerPlugin serverPlugin = serverPluginRepository.findById(new ServerPluginId(serverId, pluginId)).orElseThrow(RuntimeException::new);
 
-                    // Check for config group
-                    if (config instanceof ConfigGroup configGroup) {
-                        // Remove config group from items to check
-                        itemsToCheck.remove(config);
+        for (var config : iConfig.getChildren()) {
+            var itemsToCheck = new ArrayList<IConfigurable>();
+            itemsToCheck.add(config);
 
-                        // All the config-group's children items to check
-                        itemsToCheck.addAll(configGroup.getChildren());
+            // Check for config group
+            if (config instanceof ConfigGroup configGroup) {
+                // Remove config group from items to check
+                itemsToCheck.remove(config);
+
+                // All the config-group's children items to check
+                itemsToCheck.addAll(configGroup.getChildren());
+            }
+
+
+            for (var toCheck : itemsToCheck) {
+                var existingConfig = configRepository.findPluginConfigByServerPlugin_ServerIdAndUniqueId(serverId, toCheck.getUniqueId());
+
+                if (existingConfig.isEmpty()) {
+
+                    Object defaultValue = null;
+
+                    // Check for base component instance
+                    if (toCheck instanceof BaseComponent<?, ?> baseComponent) {
+                        defaultValue = baseComponent.getDefaultValue();
                     }
 
-                    for (var toCheck : itemsToCheck) {
-
-                        var existingConfig = configRepository.findPluginConfigByServerPlugin_ServerIdAndUniqueId(guild.getIdLong(), toCheck.getUniqueId());
-                        if (existingConfig.isEmpty()) {
-
-                            Object defaultValue = null;
-
-                            // Check for base component instance
-                            if (toCheck instanceof BaseComponent<?, ?> baseComponent) {
-                                defaultValue = baseComponent.getDefaultValue();
-                            }
-
-                            // Create default value string
-                            String defaultValueString = defaultValue == null ? "" : defaultValue.toString();
-
-                            // Check for non-primitive type
-                            if (defaultValue != null) {
-                                var clazz = defaultValue.getClass();
-                                if (!clazz.isPrimitive() && !isWrapperType(clazz) && clazz != String.class) {
-                                    defaultValueString = objectMapper.writeValueAsString(defaultValue);
-                                }
-                            }
-
-
-
-                            // Create new config entry
-                            var newConfig =
-                                    PluginConfig.builder()
-                                            // .server(server)
-                                            // .plugin(plugin)
-                                            .uniqueId(toCheck.getUniqueId())
-                                            .value(defaultValueString)
-                                            //.isEnabled(true)
-                                            .build();
-
-                            configRepository.save(newConfig);
-                        }
-                    }
+                    setConfigValue(serverPlugin, toCheck.getUniqueId(), defaultValue);
                 }
             }
         }
+    }
+
+    private PluginConfig setConfigValue(ServerPlugin serverPlugin, String uniqueId, Object value) {
+        // Create value string
+        String valueString;
+
+        // Check for non-primitive type
+        if (value != null) {
+            var clazz = value.getClass();
+            if (!clazz.isPrimitive() && !isWrapperType(clazz) && clazz != String.class) {
+                try {
+                    valueString = objectMapper.writeValueAsString(value);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                valueString = value.toString();
+            }
+        }
+        else {
+            valueString = "";
+        }
+
+        PluginConfig pluginConfig = configRepository
+                .findPluginConfigByServerPluginAndUniqueId(serverPlugin, uniqueId)
+                .orElse(
+                        PluginConfig.builder()
+                                .serverPlugin(serverPlugin)
+                                .uniqueId(uniqueId)
+                                .value(valueString)
+                                .build()
+                );
+
+        pluginConfig.setValue(valueString);
+
+        return configRepository.save(pluginConfig);
     }
 
 
@@ -217,14 +239,22 @@ public class PluginConfigurationService {
     }
 
 
-    public boolean enablePlugin(long serverId, long pluginId, boolean enabled){
+    public boolean enablePlugin(long serverId, long pluginId, Boolean enabled, IConfig config){
+        Plugin plugin = pluginRepository.findById(pluginId).orElseThrow(PluginNotFoundException::new);
+
+
         ServerPluginId serverPluginId = new ServerPluginId(serverId, pluginId);
         Optional<ServerPlugin> serverPluginOpt = serverPluginRepository.findById(serverPluginId);
 
         if (serverPluginOpt.isPresent()) {
             ServerPlugin serverPlugin = serverPluginOpt.get();
+            if (enabled == null)
+                return serverPlugin.getIsEnabled();
+
             serverPlugin.setIsEnabled(enabled);
-            serverPluginRepository.save(serverPlugin);
+            serverPlugin = serverPluginRepository.save(serverPlugin);
+
+            return serverPlugin.getIsEnabled();
         }
         else {
             // Check if the server and plugin exist
@@ -247,14 +277,17 @@ public class PluginConfigurationService {
             ServerPlugin serverPlugin = ServerPlugin.builder()
                     .server(server)
                     .plugin(pluginOpt.get())
-                    .isEnabled(enabled)
+                    .isEnabled(enabled != null && enabled)
                     .build();
 
 
             serverPluginRepository.save(serverPlugin);
+            createDefaultValues(serverId, pluginId, config);
+
+
+            return serverPlugin.getIsEnabled();
         }
 
-        return enabled;
     }
 
     public boolean getEnabled(String pluginId,
@@ -272,4 +305,15 @@ public class PluginConfigurationService {
 
         return serverPluginOpt.get().getIsEnabled();
     }
+
+    public void setConfigValue(long serverId, long pluginId, String uniqueId, Object value){
+        ServerPlugin serverPlugin = serverPluginRepository.findById(new ServerPluginId(serverId, pluginId)).orElseThrow(RuntimeException::new);
+
+        setConfigValue(serverPlugin, uniqueId, value);
+    }
+
+    public void deletePluginServer(long serverId, long pluginId) {
+        serverPluginRepository.deleteByServerPluginId_PluginIdAndServerPluginId_ServerId(serverId, pluginId);
+    }
 }
+

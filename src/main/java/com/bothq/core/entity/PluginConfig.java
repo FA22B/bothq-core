@@ -16,7 +16,7 @@ public class PluginConfig {
     private Long id;
 
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumns({
             @JoinColumn(name = "server_id", referencedColumnName = "server_id", nullable = false, foreignKey = @ForeignKey(name = "FK_SERVER")),
             @JoinColumn(name = "plugin_id", referencedColumnName = "plugin_id", nullable = false, foreignKey = @ForeignKey(name = "FK_PLUGIN"))
