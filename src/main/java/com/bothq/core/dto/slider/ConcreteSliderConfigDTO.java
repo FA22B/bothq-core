@@ -23,9 +23,9 @@ public class ConcreteSliderConfigDTO extends ConcreteGeneralConfigDTO implements
     @Setter(onMethod_ = {@JsonProperty("step")})
     private float step;
 
-    public ConcreteSliderConfigDTO(String type, String uniqueID, boolean enabled, String displayName, Object value, float minValue, float maxValue,
+    public ConcreteSliderConfigDTO(String type, String uniqueID, String displayName, Object value, float minValue, float maxValue,
                                    float step) {
-        super(type, uniqueID, enabled, displayName, value);
+        super(type, uniqueID, displayName, value);
 
         this.minValue = minValue;
         this.maxValue = maxValue;

@@ -1,25 +1,19 @@
-package com.bothq.core.plugin.config.component;
+package com.bothq.core.plugin.config.component.base;
 
 import com.bothq.core.dto.base.IConcreteConfigDTO;
+import com.bothq.lib.plugin.config.IConfigurable;
 import com.bothq.lib.plugin.config.component.IComponent;
 import com.bothq.lib.plugin.config.component.IUnselectedServerComponent;
 import lombok.Getter;
 import lombok.Setter;
 
-public abstract class BaseComponent<T, V extends IComponent<?>> implements IComponent<T>, IUnselectedServerComponent<V> {
+public abstract class BaseComponent<T, V extends IComponent<T>> implements IUnselectedServerComponent<V>, IConfigurable {
     @Getter
     protected final String uniqueId;
 
     @Getter
     @Setter
     protected String displayName;
-
-    @Getter
-    @Setter
-    protected T value;
-
-    @Getter
-    protected boolean enabled = true;
 
     protected String pluginId;
 
@@ -31,16 +25,6 @@ public abstract class BaseComponent<T, V extends IComponent<?>> implements IComp
         this.displayName = displayName;
         this.pluginId = pluginId;
         this.defaultValue = defaultValue;
-    }
-
-    @Override
-    public void enable() {
-        enabled = true;
-    }
-
-    @Override
-    public void disable() {
-        enabled = false;
     }
 
     public abstract IConcreteConfigDTO getConcreteConfigDTO(long serverId);

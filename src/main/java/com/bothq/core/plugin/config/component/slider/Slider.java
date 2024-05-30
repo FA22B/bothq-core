@@ -1,13 +1,14 @@
-package com.bothq.core.plugin.config.component;
+package com.bothq.core.plugin.config.component.slider;
 
 import com.bothq.core.dto.slider.ConcreteSliderConfigDTO;
+import com.bothq.core.plugin.config.component.base.BaseComponent;
 import com.bothq.core.service.PluginConfigurationService;
 import com.bothq.lib.plugin.config.component.ISlider;
 import com.bothq.lib.plugin.config.component.ISliderServer;
 import lombok.Getter;
 import lombok.Setter;
 
-public class Slider extends BaseComponent<Float, ISliderServer> implements ISlider, ISliderServer {
+public class Slider extends BaseComponent<Float, ISliderServer> implements ISlider {
     @Getter
     @Setter
     protected float minValue;
@@ -29,16 +30,23 @@ public class Slider extends BaseComponent<Float, ISliderServer> implements ISlid
     }
 
     @Override
-    public ISliderServer get(long serverId) {
-        setValue(PluginConfigurationService.getInstance().getConfigurationValue(serverId, pluginId, uniqueId, defaultValue));
-        return this;
+    public SliderServer get(long serverId) {
+        return new SliderServer(
+                uniqueId,
+                displayName,
+                pluginId,
+                PluginConfigurationService
+                        .getInstance()
+                        .getConfigurationValue(serverId, pluginId, uniqueId, defaultValue),
+                minValue,
+                maxValue,
+                step
+        );
     }
 
     @Override
     public ConcreteSliderConfigDTO getConcreteConfigDTO(long serverId) {
-        // Refresh value
-        get(serverId);
-
-        return new ConcreteSliderConfigDTO("slider", uniqueId, enabled, displayName, value, minValue, maxValue, step);
+        return get(serverId)
+                .getConcreteConfigDTO();
     }
 }

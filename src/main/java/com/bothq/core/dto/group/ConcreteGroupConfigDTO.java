@@ -13,9 +13,8 @@ public class ConcreteGroupConfigDTO extends ConcreteGeneralConfigDTO {
 
     public ConcreteGroupConfigDTO(String type,
                                   String uniqueID,
-                                  boolean enabled,
                                   String displayName,
                                   List<IConcreteConfigDTO> value) {
-        super(type, uniqueID, enabled, displayName, value);
+        super(type, uniqueID, displayName, value);
     }
 }
