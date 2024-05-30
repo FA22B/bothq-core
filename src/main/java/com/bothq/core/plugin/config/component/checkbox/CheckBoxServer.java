@@ -20,4 +20,9 @@ public class CheckBoxServer extends BaseServerComponent<Boolean, ICheckBoxServer
                 getValue()
         );
     }
+
+    @Override
+    public boolean isAssignable(Object value) {
+        return value instanceof Boolean;
+    }
 }

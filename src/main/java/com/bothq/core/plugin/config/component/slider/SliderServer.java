@@ -39,4 +39,11 @@ public class SliderServer extends BaseServerComponent<Float, ISliderServer> impl
                 maxValue,
                 step);
     }
+
+    @Override
+    public boolean isAssignable(Object value) {
+        return (value instanceof Float num)
+                && (minValue < num)
+                && (num < maxValue);
+    }
 }

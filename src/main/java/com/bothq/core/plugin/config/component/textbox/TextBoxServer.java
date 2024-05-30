@@ -13,4 +13,9 @@ public class TextBoxServer extends BaseServerComponent<String, ITextBoxServer> i
     public ConcreteGeneralConfigGetDTO getConcreteConfigDTO() {
         return new ConcreteGeneralConfigGetDTO("textbox", uniqueId, displayName, value);
     }
+
+    @Override
+    public boolean isAssignable(Object value) {
+        return value instanceof String;
+    }
 }

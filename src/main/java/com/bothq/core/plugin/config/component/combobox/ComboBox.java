@@ -38,6 +38,7 @@ public class ComboBox extends BaseComponent<String, IComboBoxServer> implements 
         );
     }
 
+
     @Override
     public IConcreteConfigGetDTO getConcreteConfigDTO(long serverId) {
         return get(serverId).getConcreteConfigDTO();

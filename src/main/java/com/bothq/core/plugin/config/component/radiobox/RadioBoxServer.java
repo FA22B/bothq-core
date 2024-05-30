@@ -30,4 +30,10 @@ public class RadioBoxServer extends BaseServerComponent<String, IRadioBoxServer>
                 elements
         );
     }
+
+    @Override
+    public boolean isAssignable(Object value) {
+        return (value instanceof String string)
+                && elements.contains(string);
+    }
 }

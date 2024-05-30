@@ -31,4 +31,10 @@ public class ComboBoxServer extends BaseServerComponent<String, IComboBoxServer>
                 elements
         );
     }
+
+    @Override
+    public boolean isAssignable(Object value) {
+        return (value instanceof String string)
+                && elements.contains(string);
+    }
 }
