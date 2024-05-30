@@ -13,22 +13,20 @@ import lombok.*;
 public class PluginConfig {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long configId;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "server_id", nullable = false, foreignKey = @ForeignKey(name = "FK_SERVER"))
-    private Server server;
 
-    @ManyToOne
-    @JoinColumn(name = "plugin_id", nullable = false, foreignKey = @ForeignKey(name = "FK_PLUGIN"))
-    private Plugin plugin;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumns({
+            @JoinColumn(name = "server_id", referencedColumnName = "server_id", nullable = false, foreignKey = @ForeignKey(name = "FK_SERVER")),
+            @JoinColumn(name = "plugin_id", referencedColumnName = "plugin_id", nullable = false, foreignKey = @ForeignKey(name = "FK_PLUGIN"))
+    })
+    private ServerPlugin serverPlugin;
+
 
     @Column(name = "unique_id", nullable = false)
     private String uniqueId;
 
     @Column(name = "value", nullable = false)
     private String value;
-
-    @Column(name = "is_enabled", nullable = false)
-    private Boolean isEnabled;
 }

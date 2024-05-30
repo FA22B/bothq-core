@@ -1,15 +1,18 @@
 package com.bothq.core.service;
 
-import com.bothq.core.entity.Plugin;
-import com.bothq.core.entity.PluginConfig;
-import com.bothq.core.entity.Server;
+import com.bothq.core.entity.*;
+import com.bothq.core.exceptions.PluginNotFoundException;
+import com.bothq.core.exceptions.ServerNotFoundException;
 import com.bothq.core.plugin.LoadedPlugin;
 import com.bothq.core.plugin.config.ConfigGroup;
-import com.bothq.core.plugin.config.component.BaseComponent;
+import com.bothq.core.plugin.config.component.base.BaseComponent;
 import com.bothq.core.repository.ConfigRepository;
 import com.bothq.core.repository.PluginRepository;
+import com.bothq.core.repository.ServerPluginRepository;
 import com.bothq.core.repository.ServerRepository;
+import com.bothq.lib.plugin.config.IConfig;
 import com.bothq.lib.plugin.config.IConfigurable;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +20,16 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import org.jetbrains.annotations.Contract;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +39,7 @@ public class PluginConfigurationService {
     private final ConfigRepository configRepository;
     private final ServerRepository serverRepository;
     private final PluginRepository pluginRepository;
+    private final ServerPluginRepository serverPluginRepository;
 
     private final JDA jda;
 
@@ -47,7 +55,7 @@ public class PluginConfigurationService {
 
         // Initialize existing servers
         for (var server : jda.getGuilds()) {
-            onServerJoin(new GuildJoinEvent(jda, 1337, server));
+            onServerJoin(new GuildJoinEvent(jda, 0, server));
         }
     }
 
@@ -90,63 +98,105 @@ public class PluginConfigurationService {
                 // Get the plugin
                 var plugin = pluginRepository.findByPluginId(loadedPlugin.getPluginId()).orElseThrow(() -> new RuntimeException("Plugin not found"));
 
-                for (var config : loadedPlugin.getConfig().getChildren()) {
+                createDefaultValues(guild.getIdLong(), plugin.getId(), loadedPlugin.getConfig());
+            }
+        }
+    }
 
-                    var itemsToCheck = new ArrayList<IConfigurable>();
-                    itemsToCheck.add(config);
+    private void createDefaultValues(long serverId, long pluginId, IConfig iConfig) {
+        ServerPlugin serverPlugin = serverPluginRepository.findById(new ServerPluginId(serverId, pluginId)).orElseThrow(RuntimeException::new);
 
-                    // Check for config group
-                    if (config instanceof ConfigGroup configGroup) {
-                        // Remove config group from items to check
-                        itemsToCheck.remove(config);
+        for (var config : iConfig.getChildren()) {
+            var itemsToCheck = new ArrayList<IConfigurable>();
+            itemsToCheck.add(config);
 
-                        // All the config-group's children items to check
-                        itemsToCheck.addAll(configGroup.getChildren());
+            // Check for config group
+            if (config instanceof ConfigGroup configGroup) {
+                // Remove config group from items to check
+                itemsToCheck.remove(config);
+
+                // All the config-group's children items to check
+                itemsToCheck.addAll(configGroup.getChildren());
+            }
+
+
+            for (var toCheck : itemsToCheck) {
+                var existingConfig = configRepository.findPluginConfigByServerPlugin_ServerIdAndUniqueId(serverId, toCheck.getUniqueId());
+
+                if (existingConfig.isEmpty()) {
+
+                    Object defaultValue = null;
+
+                    // Check for base component instance
+                    if (toCheck instanceof BaseComponent<?, ?> baseComponent) {
+                        defaultValue = baseComponent.getDefaultValue();
                     }
 
-                    for (var toCheck : itemsToCheck) {
-
-                        var existingConfig = configRepository.findPluginConfigByServerIdAndUniqueId(guild.getIdLong(), toCheck.getUniqueId());
-                        if (existingConfig.isEmpty()) {
-
-                            Object defaultValue = null;
-
-                            // Check for base component instance
-                            if (toCheck instanceof BaseComponent<?, ?> baseComponent) {
-                                defaultValue = baseComponent.getDefaultValue();
-                            }
-
-                            // Create default value string
-                            String defaultValueString = defaultValue == null ? "" : defaultValue.toString();
-
-                            // Check for non-primitive type
-                            if (defaultValue != null) {
-                                var clazz = defaultValue.getClass();
-                                if (!clazz.isPrimitive() && !isWrapperType(clazz) && clazz != String.class) {
-                                    defaultValueString = objectMapper.writeValueAsString(defaultValue);
-                                }
-                            }
-
-                            // Create new config entry
-                            var newConfig =
-                                    PluginConfig.builder()
-                                            .server(server)
-                                            .plugin(plugin)
-                                            .uniqueId(toCheck.getUniqueId())
-                                            .value(defaultValueString)
-                                            .isEnabled(true).build();
-                            configRepository.save(newConfig);
-                        }
-                    }
+                    setConfigValue(serverPlugin, toCheck.getUniqueId(), defaultValue);
                 }
             }
         }
     }
 
+    private PluginConfig setConfigValue(ServerPlugin serverPlugin, String uniqueId, Object value) {
+        // Create value string
+        String valueString;
+
+        // Check for non-primitive type
+        if (value != null) {
+            var clazz = value.getClass();
+            if (!clazz.isPrimitive() && !isWrapperType(clazz) && clazz != String.class) {
+                try {
+                    valueString = objectMapper.writeValueAsString(value);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else {
+                valueString = value.toString();
+            }
+        }
+        else {
+            valueString = "";
+        }
+
+        PluginConfig pluginConfig = configRepository
+                .findPluginConfigByServerPluginAndUniqueId(serverPlugin, uniqueId)
+                .orElse(
+                        PluginConfig.builder()
+                                .serverPlugin(serverPlugin)
+                                .uniqueId(uniqueId)
+                                .value(valueString)
+                                .build()
+                );
+
+        pluginConfig.setValue(valueString);
+
+        return configRepository.save(pluginConfig);
+    }
+
+
+    @Contract(pure = true)
+    public Map<String, Long> getPluginNameToIdMapping(){
+        return pluginRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(
+                        Plugin::getPluginId,
+                        Plugin::getId)
+                );
+    }
+
+    @Contract(pure = true)
+    public String getConfigId(long pluginId) {
+        return pluginRepository.findById(pluginId).orElseThrow(PluginNotFoundException::new).getPluginId();
+    }
+
+    @Contract(pure = true)
     public <T> T getConfigurationValue(long serverId, String pluginId, String configUniqueId, T defaultValue) {
-        var server = serverRepository.findById(serverId).orElseThrow(() -> new RuntimeException("Server not found"));
-        var plugin = pluginRepository.findByPluginId(pluginId).orElseThrow(() -> new RuntimeException("Plugin not found"));
-        var config = configRepository.findPluginConfigByServerIdAndPluginIdAndUniqueId(server.getId(), plugin.getId(), configUniqueId);
+        var server = serverRepository.findById(serverId).orElseThrow(ServerNotFoundException::new);
+        var plugin = pluginRepository.findByPluginId(pluginId).orElseThrow(PluginNotFoundException::new);
+
+        var config = configRepository.findPluginConfigByServerPlugin_ServerIdAndServerPlugin_PluginIdAndUniqueId(server.getId(), plugin.getId(), configUniqueId);
 
         if (config.isEmpty()) {
             return defaultValue;
@@ -166,12 +216,14 @@ public class PluginConfigurationService {
         }
     }
 
+    @Contract(pure = true)
     private boolean isWrapperType(Class<?> clazz) {
         return clazz == Boolean.class || clazz == Byte.class || clazz == Character.class ||
                 clazz == Double.class || clazz == Float.class || clazz == Integer.class ||
                 clazz == Long.class || clazz == Short.class || clazz == String.class;
     }
 
+    @Contract(pure = true)
     @SuppressWarnings("unchecked")
     private <T> T convertToPrimitive(String value, Class<?> clazz) {
         if (clazz == boolean.class || clazz == Boolean.class) return (T) Boolean.valueOf(value);
@@ -185,4 +237,83 @@ public class PluginConfigurationService {
         if (clazz == String.class) return (T) value;
         throw new IllegalArgumentException("Unsupported primitive type: " + clazz);
     }
+
+
+    public boolean enablePlugin(long serverId, long pluginId, Boolean enabled, IConfig config){
+        Plugin plugin = pluginRepository.findById(pluginId).orElseThrow(PluginNotFoundException::new);
+
+
+        ServerPluginId serverPluginId = new ServerPluginId(serverId, pluginId);
+        Optional<ServerPlugin> serverPluginOpt = serverPluginRepository.findById(serverPluginId);
+
+        if (serverPluginOpt.isPresent()) {
+            ServerPlugin serverPlugin = serverPluginOpt.get();
+            if (enabled == null)
+                return serverPlugin.getIsEnabled();
+
+            serverPlugin.setIsEnabled(enabled);
+            serverPlugin = serverPluginRepository.save(serverPlugin);
+
+            return serverPlugin.getIsEnabled();
+        }
+        else {
+            // Check if the server and plugin exist
+            Optional<Server> serverOpt = serverRepository.findById(serverId);
+            Optional<Plugin> pluginOpt = pluginRepository.findById(pluginId);
+
+
+            if (pluginOpt.isEmpty()){
+                throw new PluginNotFoundException();
+            }
+
+            Server server;
+            if (serverOpt.isEmpty()){
+                server = serverRepository.save(new Server(serverId));
+            }
+            else {
+                server = serverOpt.get();
+            }
+
+            ServerPlugin serverPlugin = ServerPlugin.builder()
+                    .server(server)
+                    .plugin(pluginOpt.get())
+                    .isEnabled(enabled != null && enabled)
+                    .build();
+
+
+            serverPluginRepository.save(serverPlugin);
+            createDefaultValues(serverId, pluginId, config);
+
+
+            return serverPlugin.getIsEnabled();
+        }
+
+    }
+
+    public boolean getEnabled(String pluginId,
+                              long serverId,
+                              boolean defaultValue) {
+
+        var server = serverRepository.findById(serverId).orElseThrow(ServerNotFoundException::new);
+        var plugin = pluginRepository.findByPluginId(pluginId).orElseThrow(PluginNotFoundException::new);
+
+        ServerPluginId serverPluginId = new ServerPluginId(server.getId(), plugin.getId());
+        Optional<ServerPlugin> serverPluginOpt = serverPluginRepository.findById(serverPluginId);
+
+        if (serverPluginOpt.isEmpty())
+            return defaultValue;
+
+        return serverPluginOpt.get().getIsEnabled();
+    }
+
+    public void setConfigValue(long serverId, long pluginId, String uniqueId, Object value){
+        ServerPlugin serverPlugin = serverPluginRepository.findById(new ServerPluginId(serverId, pluginId)).orElseThrow(RuntimeException::new);
+
+        setConfigValue(serverPlugin, uniqueId, value);
+    }
+
+    public void deletePluginServer(long serverId, long pluginId) {
+        serverPluginRepository.deleteByServerPluginId_PluginIdAndServerPluginId_ServerId(serverId, pluginId);
+    }
 }
+

@@ -14,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -30,7 +31,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    @Qualifier("GuildAuthManager")
                                                    AuthorizationManager<RequestAuthorizationContext> guildAuthManager,
-                                                   FrontendConfiguration frontendConfig) throws Exception {
+                                                   FrontendConfiguration frontendConfig,
+                                                   CookieCsrfTokenRepository csrfTokenRepository) throws Exception {
         return http
                 .anonymous(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(matcher -> matcher
@@ -42,6 +44,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/**")
                         .access(guildAuthManager)
                         .requestMatchers("/error").permitAll()
+
+                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+
                         .anyRequest().denyAll()
                 )
                 .exceptionHandling(handling -> handling
@@ -61,6 +68,10 @@ public class SecurityConfig {
                         .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT))
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 )
+                .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer
+                        // .csrfTokenRepository(csrfTokenRepository)
+                        .disable()
+                )
                 .build();
     }
 
@@ -79,6 +90,18 @@ public class SecurityConfig {
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
+    }
+
+
+    @Bean
+    CookieCsrfTokenRepository getCookieCsrfTokenRepository(){
+        CookieCsrfTokenRepository cookieCsrfTokenRepository = new CookieCsrfTokenRepository();
+        cookieCsrfTokenRepository.setCookieCustomizer(responseCookieBuilder -> responseCookieBuilder
+                        .httpOnly(false)
+                        .secure(false)
+        );
+
+        return cookieCsrfTokenRepository;
     }
 
 

@@ -101,8 +101,10 @@ public class PluginLoaderService {
             plugin.initialize(jda);
         }
 
+
+        // TODO remove this entirely
         // Create default config values
-        pluginConfigurationService.createDefaultValues(loadedPlugins);
+        // pluginConfigurationService.createDefaultValues(loadedPlugins);
 
         // Load plugins
         for (var plugin : loadedPlugins) {

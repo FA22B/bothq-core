@@ -22,7 +22,6 @@ public class ConsoleCommandListener implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-
         log.info("Application started. Type 'help' to get a list of available commands.");
 
         // Create input stream reader

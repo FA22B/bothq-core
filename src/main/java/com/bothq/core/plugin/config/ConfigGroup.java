@@ -1,6 +1,10 @@
 package com.bothq.core.plugin.config;
 
-import com.bothq.core.plugin.config.component.*;
+import com.bothq.core.plugin.config.component.checkbox.CheckBox;
+import com.bothq.core.plugin.config.component.combobox.ComboBox;
+import com.bothq.core.plugin.config.component.radiobox.RadioBox;
+import com.bothq.core.plugin.config.component.slider.Slider;
+import com.bothq.core.plugin.config.component.textbox.TextBox;
 import com.bothq.lib.plugin.config.IConfigGroup;
 import com.bothq.lib.plugin.config.IConfigurable;
 import com.bothq.lib.plugin.config.component.*;
@@ -16,8 +20,6 @@ public class ConfigGroup implements IConfigGroup {
     @Getter
     protected final String uniqueId;
 
-    @Getter
-    protected boolean enabled = true;
 
     @Getter
     @Setter
@@ -42,41 +44,31 @@ public class ConfigGroup implements IConfigGroup {
     }
 
     @Override
-    public void enable() {
-        enabled = true;
-    }
-
-    @Override
-    public void disable() {
-        enabled = false;
-    }
-
-    @Override
     public ICheckBox addCheckBox(String uniqueId, String displayName, boolean defaultValue) {
         var newUniqueId = createUniqueId(uniqueId);
         Assert.isTrue(isUniqueIdUnique(newUniqueId), "Unique ID was already set!");
 
-        var checkBox = new CheckBox(newUniqueId, displayName, pluginId, defaultValue);
+        CheckBox checkBox = new CheckBox(newUniqueId, displayName, pluginId, defaultValue);
         children.add(checkBox);
         return checkBox;
     }
 
     @Override
-    public <T> IComboBox<T> addComboBox(String uniqueId, String displayName, List<T> elements, int defaultIndex) {
+    public IComboBox addComboBox(String uniqueId, String displayName, List<String> elements, String defaultValue) {
         var newUniqueId = createUniqueId(uniqueId);
         Assert.isTrue(isUniqueIdUnique(newUniqueId), "Unique ID was already set!");
 
-        var comboBox = new ComboBox<>(newUniqueId, displayName, pluginId, null, elements, defaultIndex);
+        var comboBox = new ComboBox(newUniqueId, displayName, pluginId, defaultValue, elements);
         children.add(comboBox);
         return comboBox;
     }
 
     @Override
-    public IRadioBox addRadioBox(String uniqueId, String displayName, boolean defaultValue) {
+    public IRadioBox addRadioBox(String uniqueId, String displayName, String defaultValue, List<String> options) {
         var newUniqueId = createUniqueId(uniqueId);
         Assert.isTrue(isUniqueIdUnique(newUniqueId), "Unique ID was already set!");
 
-        var radioBox = new RadioBox(newUniqueId, displayName, pluginId, defaultValue, this);
+        var radioBox = new RadioBox(newUniqueId, displayName, pluginId, defaultValue, options);
         children.add(radioBox);
         return radioBox;
     }
