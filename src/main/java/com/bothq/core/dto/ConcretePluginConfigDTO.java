@@ -47,5 +47,5 @@ public class ConcretePluginConfigDTO {
 
     @Getter(onMethod_ = {@JsonProperty("value")})
     @Setter(onMethod_ = {@JsonProperty("value")})
-    private List<? extends IConcreteConfigDTO> value;
+    private List<IConcreteConfigDTO> value;
 }

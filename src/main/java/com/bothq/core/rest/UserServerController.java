@@ -2,9 +2,9 @@ package com.bothq.core.rest;
 
 import com.bothq.core.auth.UserInfoProvider;
 import com.bothq.core.dao.DiscordGuild;
-import com.bothq.core.dto.PluginConfigDTO;
+import com.bothq.core.dto.ConcretePluginConfigDTO;
 import com.bothq.core.entity.UserInfo;
-import com.bothq.core.service.UserServerControllerService;
+import com.bothq.core.service.PluginConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,7 +28,7 @@ import java.util.List;
 public class UserServerController {
     private final ObjectProvider<UserInfoProvider> userInfoProviders;
 
-    private final UserServerControllerService userServerControllerService;
+    private final PluginConfigService pluginConfigService;
 
 
     public UserInfoProvider getUserInfoProvider() {
@@ -48,10 +48,10 @@ public class UserServerController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{serverId}/plugins/{pluginId}")
-    public ResponseEntity<PluginConfigDTO> getPluginConfiguration(
+    public ResponseEntity<ConcretePluginConfigDTO> getPluginConfiguration(
             @Parameter(description = "ID of the server") @PathVariable Long serverId,
             @Parameter(description = "ID of the plugin") @PathVariable Long pluginId) {
-        return ResponseEntity.ok(userServerControllerService.getPluginConfiguration(serverId, pluginId));
+        return ResponseEntity.ok(pluginConfigService.getConcretePluginConfiguration(serverId, pluginId));
     }
 
     @PutMapping("/{serverId}/plugins/{pluginId}")

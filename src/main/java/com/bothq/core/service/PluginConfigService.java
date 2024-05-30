@@ -1,5 +1,6 @@
 package com.bothq.core.service;
 
+import com.bothq.core.dto.ConcretePluginConfigDTO;
 import com.bothq.core.dto.PluginConfigDTO;
 import com.bothq.core.dto.base.IConcreteConfigDTO;
 import com.bothq.core.dto.group.ConcreteGroupConfigDTO;
@@ -12,24 +13,22 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServerControllerService {
+public class PluginConfigService {
 
     private final PluginConfigurationService pluginConfigurationService;
     private final PluginLoaderService pluginLoaderService;
 
-    public PluginConfigDTO getPluginConfiguration(long serverId, long pluginId) {
-
-        // Get the string config ID from the numeral database ID
-        var configId = pluginConfigurationService.getConfigId(pluginId);
-
+    public ConcretePluginConfigDTO getConcretePluginConfiguration(long serverId, long pluginId) {
         // Get the config
-        var config = getConfig(pluginId, configId);
+        var config = getConfig(pluginId);
 
-        return new PluginConfigDTO(
+        return new ConcretePluginConfigDTO(
                 200,
                 "Success",
                 pluginId,
@@ -41,7 +40,44 @@ public class UserServerControllerService {
                 getPluginConfigDTO(serverId, config));
     }
 
-    private Config getConfig(long pluginId, String configId) {
+    public PluginConfigDTO getPlugin(long pluginId) {
+        // Get the config
+        var config = getConfig(pluginId);
+
+        return new PluginConfigDTO(
+                200,
+                "Success",
+                pluginId,
+                config.getUniqueId(),
+                config.getDisplayName(),
+                config.getDescription());
+    }
+
+
+    public List<PluginConfigDTO> getAllPlugins(){
+        Map<String, Long> pluginNameToIdMapping = pluginConfigurationService.getPluginNameToIdMapping();
+
+
+        return pluginLoaderService
+                .getLoadedPlugins()
+                .stream()
+                .map(LoadedPlugin::getConfig)
+                .map(config -> new PluginConfigDTO(
+                        200,
+                        "Success",
+                        pluginNameToIdMapping.get(config.getPluginId()),
+                        config.getUniqueId(),
+                        config.getDisplayName(),
+                        config.getDescription()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
+
+
+    private Config getConfig(long pluginId) {
+        var configId = pluginConfigurationService.getConfigId(pluginId);
 
         // Try to find the plugin
         LoadedPlugin foundPlugin = null;
