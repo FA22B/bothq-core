@@ -3,6 +3,8 @@ package com.bothq.core.service;
 import com.bothq.core.entity.Plugin;
 import com.bothq.core.entity.PluginConfig;
 import com.bothq.core.entity.Server;
+import com.bothq.core.exceptions.PluginNotFoundException;
+import com.bothq.core.exceptions.ServerNotFoundException;
 import com.bothq.core.plugin.LoadedPlugin;
 import com.bothq.core.plugin.config.ConfigGroup;
 import com.bothq.core.plugin.config.component.BaseComponent;
@@ -17,12 +19,15 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import org.jetbrains.annotations.Contract;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -127,6 +132,8 @@ public class PluginConfigurationService {
                                 }
                             }
 
+
+
                             // Create new config entry
                             var newConfig =
                                     PluginConfig.builder()
@@ -143,13 +150,27 @@ public class PluginConfigurationService {
         }
     }
 
-    public String getConfigId(long pluginId) {
-        return pluginRepository.findById(pluginId).orElseThrow(() -> new RuntimeException("Plugin not found!")).getPluginId();
+
+    @Contract(pure = true)
+    public Map<String, Long> getPluginNameToIdMapping(){
+        return pluginRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(
+                        Plugin::getPluginId,
+                        Plugin::getId)
+                );
     }
 
+    @Contract(pure = true)
+    public String getConfigId(long pluginId) {
+        return pluginRepository.findById(pluginId).orElseThrow(PluginNotFoundException::new).getPluginId();
+    }
+
+    @Contract(pure = true)
     public <T> T getConfigurationValue(long serverId, String pluginId, String configUniqueId, T defaultValue) {
-        var server = serverRepository.findById(serverId).orElseThrow(() -> new RuntimeException("Server not found"));
-        var plugin = pluginRepository.findByPluginId(pluginId).orElseThrow(() -> new RuntimeException("Plugin not found"));
+        var server = serverRepository.findById(serverId).orElseThrow(ServerNotFoundException::new);
+        var plugin = pluginRepository.findByPluginId(pluginId).orElseThrow(PluginNotFoundException::new);
+
         var config = configRepository.findPluginConfigByServerIdAndPluginIdAndUniqueId(server.getId(), plugin.getId(), configUniqueId);
 
         if (config.isEmpty()) {
@@ -170,12 +191,14 @@ public class PluginConfigurationService {
         }
     }
 
+    @Contract(pure = true)
     private boolean isWrapperType(Class<?> clazz) {
         return clazz == Boolean.class || clazz == Byte.class || clazz == Character.class ||
                 clazz == Double.class || clazz == Float.class || clazz == Integer.class ||
                 clazz == Long.class || clazz == Short.class || clazz == String.class;
     }
 
+    @Contract(pure = true)
     @SuppressWarnings("unchecked")
     private <T> T convertToPrimitive(String value, Class<?> clazz) {
         if (clazz == boolean.class || clazz == Boolean.class) return (T) Boolean.valueOf(value);
