@@ -15,7 +15,7 @@ Optionally you can specify a `proxyHost` and `proxyPort` if needed, where the ho
 ## QUICKSTART
 
 ### Benötigte Repositories pullen:  
-https://github.com/FA22B/bothq-core/tree/v0.1.3  
+https://github.com/FA22B/bothq-core/tree/v0.1.2  
 https://github.com/FA22B/bothq-frontend/tree/v0.1.0  
 
 
