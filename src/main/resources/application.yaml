@@ -60,10 +60,11 @@ frontend:
   redirect-error-uri: http://localhost:4200/redirect?success=false
 
 
-# server:
-#  servlet:
-#    session:
-#      persistent: false
+server:
+  servlet:
+    session:
+      persistent: false
+      timeout: 90m
 #  error:
 #    whitelabel:
 #      enabled: false

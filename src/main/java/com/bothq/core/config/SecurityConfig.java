@@ -36,13 +36,14 @@ public class SecurityConfig {
         return http
                 .anonymous(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(matcher -> matcher
+                        // Allow access to plugin list without login
+                        .requestMatchers("/api/*/plugins/**").permitAll()
+
                         // Guild Trust resolver
-                        .requestMatchers("/api/*/guild/**")
-                        .access(guildAuthManager)
+                        .requestMatchers("/api/*/guild/**").access(guildAuthManager)
 
                         // Default API Trust Resolver
-                        .requestMatchers("/api/**")
-                        .access(guildAuthManager)
+                        .requestMatchers("/api/**").access(guildAuthManager)
                         .requestMatchers("/error").permitAll()
 
                         .requestMatchers("/swagger-ui.html").permitAll()
